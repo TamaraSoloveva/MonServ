@@ -15,10 +15,7 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+        main.cpp mainwindow.cpp mainwindow.h ui_MonServ.h outTimerClass.cpp outTimerClass.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
