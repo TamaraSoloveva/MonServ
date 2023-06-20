@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include <QAbstractScrollArea>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), ini_file(QApplication::applicationDirPath() + "/MonServ.ini"),
       m_serial(new QSerialPort(this)) {
@@ -7,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     init_comboBoxes();
     init_statusBar();
+    restoreSettings();
 
     lineEdVect.append(ui->lineEdit_4);
     lineEdVect.append(ui->lineEdit_5);
@@ -17,8 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
     lineEdVect.append(ui->lineEdit_11);
     lineEdVect.append(ui->lineEdit_12);
 
+
+
     connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::manageSerialPort);
     connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleErrorFromPort);
+    connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+
 }
 
 void MainWindow::handleErrorFromPort( QSerialPort::SerialPortError error) {
@@ -26,6 +33,21 @@ void MainWindow::handleErrorFromPort( QSerialPort::SerialPortError error) {
         QMessageBox::critical(this, tr("Critical Error"), m_serial->errorString());
         closeSerialPort();
     }
+}
+
+void MainWindow::readData() {
+    const QByteArray data = m_serial->readAll();
+    parseData p(data);
+    connect(&p, &parseData::showData, this, &MainWindow::showString);
+    //connect(&p, &parseData::showData, ui->textEdit, &QTextEdit::insertPlainText);
+    p.parser();
+}
+
+void MainWindow::showString( const QString &str ) {
+    ui->textEdit->insertPlainText(str);
+
+//    QScrollBar *bar = verticalScrollBar();
+//    bar->setValue(bar->maximum());
 }
 
 void MainWindow::manageSerialPort() {
@@ -38,6 +60,7 @@ void MainWindow::manageSerialPort() {
 }
 
 MainWindow::~MainWindow() {
+    saveSettings();
     delete ui;
 }
 
@@ -96,6 +119,53 @@ void MainWindow::closeSerialPort() {
         m_serial->close();
         connectInterface(false);
     }
+
+}
+
+
+void MainWindow::saveSettings() {
+    //сохранение положения на экране и размера
+    setValueToIniFile("Settings", "GeometryX", MainWindow::geometry().x());
+    setValueToIniFile("Settings", "GeometryY", MainWindow::geometry().y());
+    setValueToIniFile("Settings", "Height", MainWindow::height());
+    setValueToIniFile("Settings", "Width", MainWindow::width());
+    ini_file.sync();
+}
+
+
+void MainWindow::restoreSettings() {
+    //Восстанавливаем положение на экране + размеры
+    QVector<int>params;
+    int val;
+    getValueFromIni("Settings", "GeometryX", val);
+    params.push_back(val);
+    getValueFromIni("Settings", "GeometryY", val),
+    params.push_back(val);
+    getValueFromIni("Settings", "Height", val);
+    params.push_back(val);
+    getValueFromIni("Settings", "Width", val);
+    params.push_back(val);
+    MainWindow::setGeometry( params.at(0), params.at(1), params.at(2), params.at(3));
+
+    //В Windows 10 не прорисовываются кое-где границы
+     if(QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS10){
+            setStyleSheet(
+                "QHeaderView::section{"
+                    "border-top:0px solid #D8D8D8;"
+                    "border-left:0px solid #D8D8D8;"
+                    "border-right:1px solid #D8D8D8;"
+                    "border-bottom: 1px solid #D8D8D8;"
+                    "background-color:white;"
+                    "padding:4px;"
+                "}"
+                "QTableCornerButton::section{"
+                    "border-top:0px solid #D8D8D8;"
+                    "border-left:0px solid #D8D8D8;"
+                    "border-right:1px solid #D8D8D8;"
+                    "border-bottom: 1px solid #D8D8D8;"
+                    "background-color:white;"
+                "}");
+     }
 
 }
 
@@ -168,17 +238,17 @@ void MainWindow::init_comboBoxes() {
 
 //   connect(ui->comboBox_6, SIGNAL(currentIndexChanged(QString)),  &MainWindow::slotReWrSettingsInIni );
 //     connect(ui->comboBox_6, &QComboBox::currentIndexChanged, &MainWindow::slotReWrSettingsInIni);
-    connect(ui->comboBox_7, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-       connect(ui->comboBox_5, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-       connect(ui->comboBox_4, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-       connect(ui->comboBox_10, SIGNAL(currentIndexChanged(QString)),SLOT(slotReWrSettingsInIni(QString)));
-       connect(ui->comboBox_9, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-       connect(ui->comboBox_3, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
+//    connect(ui->comboBox_7, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
+//       connect(ui->comboBox_5, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
+//       connect(ui->comboBox_4, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
+//       connect(ui->comboBox_10, SIGNAL(currentIndexChanged(QString)),SLOT(slotReWrSettingsInIni(QString)));
+//       connect(ui->comboBox_9, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
+//       connect(ui->comboBox_3, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
 
 
-//  connect(ui->comboBox)
-          connect(ui->comboBox, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));;
-       connect(ui->comboBox_2, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));
+////  connect(ui->comboBox)
+//          connect(ui->comboBox, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));;
+//       connect(ui->comboBox_2, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));
 }
 
 

@@ -15,7 +15,7 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 
 set(PROJECT_SOURCES
-        main.cpp mainwindow.cpp mainwindow.h ui_MonServ.h outTimerClass.cpp outTimerClass.h
+        main.cpp mainwindow.cpp mainwindow.h ui_MonServ.h outTimerClass.cpp outTimerClass.h parseData.cpp parseData.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -44,6 +44,7 @@ endif()
 target_link_libraries(MonServ PRIVATE
        Qt${QT_VERSION_MAJOR}::Widgets
        Qt${QT_VERSION_MAJOR}::SerialPort )
+
 
 set_target_properties(MonServ PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

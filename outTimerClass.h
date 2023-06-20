@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QTime>
 
+
 class showClock : public QLabel {
     Q_OBJECT
 

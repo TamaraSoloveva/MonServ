@@ -9,8 +9,10 @@
 #include <QShortcut>
 #include <QMessageBox>
 #include <QTimer>
+#include <QPlainTextEdit>
+#include <QScrollBar>
 
-#include <QComboBox>
+#include "parseData.h"
 
 #include <QDebug>
 #include "ui_MonServ.h"
@@ -42,10 +44,14 @@ private:
     void connectInterface( bool setConnected );
 
 
+
+
     QVector<QLineEdit *>lineEdVect;
 
     void init_comboBoxes();
     void init_statusBar();
+    void restoreSettings();
+    void saveSettings();
     void updateComInfo( QComboBox *cb);
     void sortAlphabetically(QComboBox *cB);
     void setValidatorsFunc(const QObject *var);
@@ -62,6 +68,10 @@ private slots:
     void slotReWrSettingsInIni( const QString & str );
     void manageSerialPort();
     void handleErrorFromPort(QSerialPort::SerialPortError error);
+
+
+public slots:
+    void showString( const QString &str);
 
 
 
