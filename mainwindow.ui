@@ -6,12 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>721</width>
-    <height>673</height>
+    <width>843</width>
+    <height>652</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>819</width>
+    <height>652</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>MonC_R</string>
+   <string>MonServ</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -27,7 +33,7 @@
      <height>611</height>
     </size>
    </property>
-   <layout class="QGridLayout" name="gridLayout_12">
+   <layout class="QGridLayout" name="gridLayout_10">
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -1015,13 +1021,20 @@
        <attribute name="title">
         <string>Монитор</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_14">
+       <layout class="QGridLayout" name="gridLayout_12">
         <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="horizontalLayout_35">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QTextEdit" name="textEdit"/>
+             <widget class="QTextEdit" name="textEdit">
+              <property name="minimumSize">
+               <size>
+                <width>390</width>
+                <height>329</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="Line" name="line_3">
@@ -1054,8 +1067,15 @@
              </spacer>
             </item>
             <item>
-             <layout class="QGridLayout" name="gridLayout_10">
-              <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QPushButton" name="pushButton_29">
+                <property name="text">
+                 <string>Открыть</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="horizontalSpacer_2">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1071,73 +1091,14 @@
                 </property>
                </spacer>
               </item>
-              <item row="0" column="1">
-               <widget class="QPushButton" name="pushButton_24">
-                <property name="text">
-                 <string>Новый</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <spacer name="horizontalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="3">
-               <widget class="QPushButton" name="pushButton_29">
-                <property name="text">
-                 <string>Открыть</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="4">
-               <spacer name="horizontalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="5">
+              <item>
                <widget class="QPushButton" name="pushButton_30">
                 <property name="text">
-                 <string>Сохранить</string>
+                 <string>Запустить</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="6">
-               <spacer name="horizontalSpacer_48">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>13</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="0">
+              <item>
                <spacer name="horizontalSpacer_5">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1153,38 +1114,15 @@
                 </property>
                </spacer>
               </item>
-              <item row="1" column="1">
-               <widget class="QPushButton" name="pushButton_31">
-                <property name="text">
-                 <string>Запустить</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <spacer name="horizontalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="3">
+              <item>
                <widget class="QPushButton" name="pushButton_32">
                 <property name="text">
                  <string>Пошагово</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="4">
-               <spacer name="horizontalSpacer_14">
+              <item>
+               <spacer name="horizontalSpacer_4">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -1199,14 +1137,14 @@
                 </property>
                </spacer>
               </item>
-              <item row="1" column="5">
+              <item>
                <widget class="QPushButton" name="pushButton_33">
                 <property name="text">
                  <string>Прервать</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="6">
+              <item>
                <spacer name="horizontalSpacer_57">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -3301,7 +3239,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>721</width>
+     <width>843</width>
      <height>21</height>
     </rect>
    </property>
@@ -3312,6 +3250,7 @@
     <property name="title">
      <string>Сервис</string>
     </property>
+    <addaction name="action_3"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -3373,6 +3312,11 @@
   <action name="action_2">
    <property name="text">
     <string>Цвет приложения</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>Восстановить каталоги по умолч</string>
    </property>
   </action>
  </widget>

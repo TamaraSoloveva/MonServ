@@ -1,13 +1,13 @@
 /********************************************************************************
-** Form generated from reading UI file 'mainwindowHVqeTs.ui'
+** Form generated from reading UI file 'mainwindowCXMAvb.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.15.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef MAINWINDOWHVQETS_H
-#define MAINWINDOWHVQETS_H
+#ifndef MAINWINDOWCXMAVB_H
+#define MAINWINDOWCXMAVB_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
@@ -47,8 +47,9 @@ public:
     QAction *action_log_3;
     QAction *action;
     QAction *action_2;
+    QAction *action_3;
     QWidget *centralwidget;
-    QGridLayout *gridLayout_12;
+    QGridLayout *gridLayout_10;
     QHBoxLayout *horizontalLayout;
     QFormLayout *formLayout;
     QLabel *label_2;
@@ -145,27 +146,21 @@ public:
     QRadioButton *radioButton_2;
     QSpacerItem *horizontalSpacer_18;
     QWidget *tab_5;
-    QGridLayout *gridLayout_14;
-    QHBoxLayout *horizontalLayout_2;
+    QGridLayout *gridLayout_12;
+    QHBoxLayout *horizontalLayout_35;
     QHBoxLayout *horizontalLayout_4;
     QTextEdit *textEdit;
     QFrame *line_3;
     QVBoxLayout *verticalLayout_2;
     QComboBox *comboBox_8;
     QSpacerItem *verticalSpacer;
-    QGridLayout *gridLayout_10;
-    QSpacerItem *horizontalSpacer_2;
-    QPushButton *pushButton_24;
-    QSpacerItem *horizontalSpacer_3;
+    QHBoxLayout *horizontalLayout_2;
     QPushButton *pushButton_29;
-    QSpacerItem *horizontalSpacer_4;
+    QSpacerItem *horizontalSpacer_2;
     QPushButton *pushButton_30;
-    QSpacerItem *horizontalSpacer_48;
     QSpacerItem *horizontalSpacer_5;
-    QPushButton *pushButton_31;
-    QSpacerItem *horizontalSpacer_6;
     QPushButton *pushButton_32;
-    QSpacerItem *horizontalSpacer_14;
+    QSpacerItem *horizontalSpacer_4;
     QPushButton *pushButton_33;
     QSpacerItem *horizontalSpacer_57;
     QSpacerItem *verticalSpacer_14;
@@ -350,7 +345,8 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(721, 673);
+        MainWindow->resize(843, 652);
+        MainWindow->setMinimumSize(QSize(819, 652));
         QIcon icon;
         icon.addFile(QString::fromUtf8("../../../../../.designer/backup/main_pic7.ico"), QSize(), QIcon::Normal, QIcon::Off);
         MainWindow->setWindowIcon(icon);
@@ -372,11 +368,13 @@ public:
         action->setChecked(true);
         action_2 = new QAction(MainWindow);
         action_2->setObjectName(QString::fromUtf8("action_2"));
+        action_3 = new QAction(MainWindow);
+        action_3->setObjectName(QString::fromUtf8("action_3"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         centralwidget->setMinimumSize(QSize(720, 611));
-        gridLayout_12 = new QGridLayout(centralwidget);
-        gridLayout_12->setObjectName(QString::fromUtf8("gridLayout_12"));
+        gridLayout_10 = new QGridLayout(centralwidget);
+        gridLayout_10->setObjectName(QString::fromUtf8("gridLayout_10"));
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         formLayout = new QFormLayout();
@@ -514,7 +512,7 @@ public:
         horizontalLayout->addLayout(verticalLayout_35);
 
 
-        gridLayout_12->addLayout(horizontalLayout, 0, 0, 1, 1);
+        gridLayout_10->addLayout(horizontalLayout, 0, 0, 1, 1);
 
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
@@ -908,14 +906,15 @@ public:
         tab_5 = new QWidget();
         tab_5->setObjectName(QString::fromUtf8("tab_5"));
         tab_5->setLayoutDirection(Qt::LeftToRight);
-        gridLayout_14 = new QGridLayout(tab_5);
-        gridLayout_14->setObjectName(QString::fromUtf8("gridLayout_14"));
-        horizontalLayout_2 = new QHBoxLayout();
-        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        gridLayout_12 = new QGridLayout(tab_5);
+        gridLayout_12->setObjectName(QString::fromUtf8("gridLayout_12"));
+        horizontalLayout_35 = new QHBoxLayout();
+        horizontalLayout_35->setObjectName(QString::fromUtf8("horizontalLayout_35"));
         horizontalLayout_4 = new QHBoxLayout();
         horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
         textEdit = new QTextEdit(tab_5);
         textEdit->setObjectName(QString::fromUtf8("textEdit"));
+        textEdit->setMinimumSize(QSize(390, 329));
 
         horizontalLayout_4->addWidget(textEdit);
 
@@ -927,7 +926,7 @@ public:
         horizontalLayout_4->addWidget(line_3);
 
 
-        horizontalLayout_2->addLayout(horizontalLayout_4);
+        horizontalLayout_35->addLayout(horizontalLayout_4);
 
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
@@ -940,72 +939,46 @@ public:
 
         verticalLayout_2->addItem(verticalSpacer);
 
-        gridLayout_10 = new QGridLayout();
-        gridLayout_10->setObjectName(QString::fromUtf8("gridLayout_10"));
-        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
-
-        gridLayout_10->addItem(horizontalSpacer_2, 0, 0, 1, 1);
-
-        pushButton_24 = new QPushButton(tab_5);
-        pushButton_24->setObjectName(QString::fromUtf8("pushButton_24"));
-
-        gridLayout_10->addWidget(pushButton_24, 0, 1, 1, 1);
-
-        horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
-
-        gridLayout_10->addItem(horizontalSpacer_3, 0, 2, 1, 1);
-
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
         pushButton_29 = new QPushButton(tab_5);
         pushButton_29->setObjectName(QString::fromUtf8("pushButton_29"));
 
-        gridLayout_10->addWidget(pushButton_29, 0, 3, 1, 1);
+        horizontalLayout_2->addWidget(pushButton_29);
 
-        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
 
-        gridLayout_10->addItem(horizontalSpacer_4, 0, 4, 1, 1);
+        horizontalLayout_2->addItem(horizontalSpacer_2);
 
         pushButton_30 = new QPushButton(tab_5);
         pushButton_30->setObjectName(QString::fromUtf8("pushButton_30"));
 
-        gridLayout_10->addWidget(pushButton_30, 0, 5, 1, 1);
-
-        horizontalSpacer_48 = new QSpacerItem(13, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        gridLayout_10->addItem(horizontalSpacer_48, 0, 6, 1, 1);
+        horizontalLayout_2->addWidget(pushButton_30);
 
         horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
 
-        gridLayout_10->addItem(horizontalSpacer_5, 1, 0, 1, 1);
-
-        pushButton_31 = new QPushButton(tab_5);
-        pushButton_31->setObjectName(QString::fromUtf8("pushButton_31"));
-
-        gridLayout_10->addWidget(pushButton_31, 1, 1, 1, 1);
-
-        horizontalSpacer_6 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
-
-        gridLayout_10->addItem(horizontalSpacer_6, 1, 2, 1, 1);
+        horizontalLayout_2->addItem(horizontalSpacer_5);
 
         pushButton_32 = new QPushButton(tab_5);
         pushButton_32->setObjectName(QString::fromUtf8("pushButton_32"));
 
-        gridLayout_10->addWidget(pushButton_32, 1, 3, 1, 1);
+        horizontalLayout_2->addWidget(pushButton_32);
 
-        horizontalSpacer_14 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
+        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
 
-        gridLayout_10->addItem(horizontalSpacer_14, 1, 4, 1, 1);
+        horizontalLayout_2->addItem(horizontalSpacer_4);
 
         pushButton_33 = new QPushButton(tab_5);
         pushButton_33->setObjectName(QString::fromUtf8("pushButton_33"));
 
-        gridLayout_10->addWidget(pushButton_33, 1, 5, 1, 1);
+        horizontalLayout_2->addWidget(pushButton_33);
 
         horizontalSpacer_57 = new QSpacerItem(13, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        gridLayout_10->addItem(horizontalSpacer_57, 1, 6, 1, 1);
+        horizontalLayout_2->addItem(horizontalSpacer_57);
 
 
-        verticalLayout_2->addLayout(gridLayout_10);
+        verticalLayout_2->addLayout(horizontalLayout_2);
 
         verticalSpacer_14 = new QSpacerItem(20, 13, QSizePolicy::Minimum, QSizePolicy::Fixed);
 
@@ -1028,10 +1001,10 @@ public:
         verticalLayout_2->addWidget(tableWidget_2);
 
 
-        horizontalLayout_2->addLayout(verticalLayout_2);
+        horizontalLayout_35->addLayout(verticalLayout_2);
 
 
-        gridLayout_14->addLayout(horizontalLayout_2, 0, 0, 1, 1);
+        gridLayout_12->addLayout(horizontalLayout_35, 0, 0, 1, 1);
 
         tabWidget->addTab(tab_5, QString());
         tab_2 = new QWidget();
@@ -1993,7 +1966,7 @@ public:
 
         tabWidget->addTab(tab_4, QString());
 
-        gridLayout_12->addWidget(tabWidget, 1, 0, 1, 1);
+        gridLayout_10->addWidget(tabWidget, 1, 0, 1, 1);
 
         MainWindow->setCentralWidget(centralwidget);
         statusbar = new QStatusBar(MainWindow);
@@ -2001,7 +1974,7 @@ public:
         MainWindow->setStatusBar(statusbar);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 721, 21));
+        menuBar->setGeometry(QRect(0, 0, 843, 21));
         menuBar->setNativeMenuBar(false);
         menu = new QMenu(menuBar);
         menu->setObjectName(QString::fromUtf8("menu"));
@@ -2017,6 +1990,7 @@ public:
 
         menuBar->addAction(menu->menuAction());
         menuBar->addAction(menu_2->menuAction());
+        menu->addAction(action_3);
         menu_2->addAction(menu_3->menuAction());
         menu_3->addAction(action_log_3);
         menu_3->addSeparator();
@@ -2032,12 +2006,13 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MonC_R", nullptr));
+        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MonServ", nullptr));
         action_4->setText(QCoreApplication::translate("MainWindow", "\320\222\320\272\320\273\321\216\321\207\320\270\321\202\321\214", nullptr));
         action_log_2->setText(QCoreApplication::translate("MainWindow", "\320\244\320\260\320\271\320\273 \321\200\320\265\320\263\320\270\321\201\321\202\320\260\321\200\321\206\320\270\320\270(log)", nullptr));
         action_log_3->setText(QCoreApplication::translate("MainWindow", "\320\244\320\260\320\271\320\273 \321\200\320\265\320\263\320\270\321\201\321\202\321\200\320\260\321\206\320\270\320\270(log)", nullptr));
         action->setText(QCoreApplication::translate("MainWindow", "\320\241\320\273\320\265\320\264\320\270\321\202\321\214 \320\267\320\260 \320\235\320\225\320\235\320\236\320\240\320\234\320\220", nullptr));
         action_2->setText(QCoreApplication::translate("MainWindow", "\320\246\320\262\320\265\321\202 \320\277\321\200\320\270\320\273\320\276\320\266\320\265\320\275\320\270\321\217", nullptr));
+        action_3->setText(QCoreApplication::translate("MainWindow", "\320\222\320\276\321\201\321\201\321\202\320\260\320\275\320\276\320\262\320\270\321\202\321\214 \320\272\320\260\321\202\320\260\320\273\320\276\320\263\320\270 \320\277\320\276 \321\203\320\274\320\276\320\273\321\207", nullptr));
         label_2->setText(QCoreApplication::translate("MainWindow", "\320\234\320\276\320\264\321\203\320\273\321\214/\320\230\320\267\320\264\320\265\320\273\320\270\320\265", nullptr));
         label_3->setText(QCoreApplication::translate("MainWindow", "\320\235\320\276\320\274\320\265\321\200", nullptr));
         pushButton->setText(QCoreApplication::translate("MainWindow", "\320\237\320\276\320\264\320\272\320\273\321\216\321\207\320\270\321\202\321\214\321\201\321\217", nullptr));
@@ -2066,10 +2041,8 @@ public:
         radioButton->setText(QCoreApplication::translate("MainWindow", "\320\242\320\265\320\272\321\201\321\202\320\276\320\262\321\213\320\271", nullptr));
         radioButton_2->setText(QCoreApplication::translate("MainWindow", "\320\224\320\262\320\276\320\270\321\207\320\275\321\213\320\271", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("MainWindow", "\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\270", nullptr));
-        pushButton_24->setText(QCoreApplication::translate("MainWindow", "\320\235\320\276\320\262\321\213\320\271", nullptr));
         pushButton_29->setText(QCoreApplication::translate("MainWindow", "\320\236\321\202\320\272\321\200\321\213\321\202\321\214", nullptr));
-        pushButton_30->setText(QCoreApplication::translate("MainWindow", "\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214", nullptr));
-        pushButton_31->setText(QCoreApplication::translate("MainWindow", "\320\227\320\260\320\277\321\203\321\201\321\202\320\270\321\202\321\214", nullptr));
+        pushButton_30->setText(QCoreApplication::translate("MainWindow", "\320\227\320\260\320\277\321\203\321\201\321\202\320\270\321\202\321\214", nullptr));
         pushButton_32->setText(QCoreApplication::translate("MainWindow", "\320\237\320\276\321\210\320\260\320\263\320\276\320\262\320\276", nullptr));
         pushButton_33->setText(QCoreApplication::translate("MainWindow", "\320\237\321\200\320\265\321\200\320\262\320\260\321\202\321\214", nullptr));
         QTableWidgetItem *___qtablewidgetitem = tableWidget_2->horizontalHeaderItem(0);
@@ -2166,4 +2139,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // MAINWINDOWHVQETS_H
+#endif // MAINWINDOWCXMAVB_H

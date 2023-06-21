@@ -16,6 +16,7 @@ find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 
 set(PROJECT_SOURCES
         main.cpp mainwindow.cpp mainwindow.h ui_MonServ.h outTimerClass.cpp outTimerClass.h parseData.cpp parseData.h
+        script.cpp script.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

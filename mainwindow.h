@@ -11,8 +11,12 @@
 #include <QTimer>
 #include <QPlainTextEdit>
 #include <QScrollBar>
+#include <QDir>
+#include <QLibrary>
+#include <QFileDialog>
 
 #include "parseData.h"
+#include "script.h"
 
 #include <QDebug>
 #include "ui_MonServ.h"
@@ -22,6 +26,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class Ui_MainWindow;
+class Script;
 
 class MainWindow : public QMainWindow, public Ui_MainWindow
 {
@@ -35,6 +40,11 @@ private:
     Ui::MainWindow *ui;
     QSettings ini_file;
     QSerialPort *m_serial = nullptr;
+    QVector<QLineEdit *>lineEdVect;
+    QLibrary *libUSB;
+
+    Script *fl;
+
 
 
     void openSerialPort();
@@ -42,11 +52,13 @@ private:
     void writeData(const QByteArray &data);
     void readData();
     void connectInterface( bool setConnected );
+    int LoadUSBLib(const QString & libName);
 
 
 
 
-    QVector<QLineEdit *>lineEdVect;
+
+
 
     void init_comboBoxes();
     void init_statusBar();
@@ -60,18 +72,42 @@ private:
     void getValueFromIni(const QString &group, const QString &section, bool &value);
     void getValueFromIni(const QString &group, const QString &section, QString &value);
 
-    void setValueToIniFile( const QString &group, const QString &section, const QString &val );
-    void setValueToIniFile( const QString &group, const QString &section, const bool &val );
-    void setValueToIniFile( const QString &group, const QString &section, const int &val );
+
+
+    typedef bool (*Toggle_Func_Type)( bool state );
+    Toggle_Func_Type Toggle_Func;
+    typedef int (*rele_on_type)( int num );
+    rele_on_type rele_on;
+    typedef int (*rele_off_type )( int num );
+    rele_off_type rele_off;
+    typedef int (*GetDeviceCount_type)();
+    GetDeviceCount_type GetDeviceCount;
+    typedef int (*rele_id_on_type) (int id);
+    rele_id_on_type rele_id_on;
+    typedef int (*rele_id_off_type) (int id);
+    rele_id_off_type rele_id_off;
+    typedef int (*rele_get_id_type)(int num);
+    rele_get_id_type rele_get_id;
+    typedef void (*free_mem_type)();
+    free_mem_type free_mem;
 
 private slots:
     void slotReWrSettingsInIni( const QString & str );
     void manageSerialPort();
     void handleErrorFromPort(QSerialPort::SerialPortError error);
+    void slotSetWrkFilesDir();
+
+    void setValueToIniFile( const QString &group, const QString &section, const QString &val );
+    void setValueToIniFile( const QString &group, const QString &section, const bool &val );
+    void setValueToIniFile( const QString &group, const QString &section, const int &val );
+
+    void openButtonClicked();
 
 
 public slots:
     void showString( const QString &str);
+    void addLineToTable(const QVector<QVector<QString> > &line);
+
 
 
 

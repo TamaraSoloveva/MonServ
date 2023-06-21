@@ -1,15 +1,23 @@
 #include "mainwindow.h"
 
+
+
 #include <QAbstractScrollArea>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), ini_file(QApplication::applicationDirPath() + "/MonServ.ini"),
-      m_serial(new QSerialPort(this)) {
+      m_serial(new QSerialPort(this)), fl(nullptr) {
 
     ui->setupUi(this);
     init_comboBoxes();
     init_statusBar();
     restoreSettings();
+
+
+
+
+
+
 
     lineEdVect.append(ui->lineEdit_4);
     lineEdVect.append(ui->lineEdit_5);
@@ -26,6 +34,88 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleErrorFromPort);
     connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
 
+    connect(ui->comboBox_6,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_8,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_7,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_5,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_4,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_10,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_9,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_3,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+
+    connect(ui->lineEdit, &QLineEdit::textChanged, [this, str = ui->lineEdit->text() ](){ setValueToIniFile("WorkingDirectories", "Reports_path", str);} );
+    connect(ui->lineEdit_2, &QLineEdit::textChanged, [this, str = ui->lineEdit_2->text()]{ setValueToIniFile("WorkingDirectories", "Capture_path", str);} );
+//    connect(action_3, &QAction::triggered, [this]() {ui->lineEdit_2->text( QDir::currentPath());
+//                ui->lineEdit_1->text( QDir::currentPath());});
+
+
+     connect(ui->pushButton_5, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
+     connect(ui->pushButton_6, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
+     connect(ui->pushButton_29, &QPushButton::clicked, this, &MainWindow::openButtonClicked);
+    //Библиотека USB
+    int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
+    if (bLoad == -1) {
+       QMessageBox::critical(0, "MonServ",
+              QString(tr("Библиотека MP709.dll не обнаружена в каталоге %1")).arg( QDir::currentPath().toUtf8().data()),
+              QMessageBox::Ok);
+    }
+    else if (bLoad == -2)
+        QMessageBox::critical(0, "MonServ", tr("Ошибка при подгрузке функций"), QMessageBox::Ok);
+
+}
+
+void MainWindow::addLineToTable(const QVector<QVector<QString>> &line) {
+
+}
+
+void MainWindow::openButtonClicked() {
+    QString filename = QFileDialog::getOpenFileName(0, "OpenDialog", QDir::currentPath(), "*.dbg");
+    if (!filename.isEmpty()){
+        ui->comboBox_8->insertItem(0,filename);
+        Script s(filename);
+        connect(&s, &Script::addLine, this, &MainWindow::addLineToTable );
+
+
+
+
+
+    }
+
+}
+
+int MainWindow::LoadUSBLib(const QString & libName) {
+    if (!QFile::exists(libName))
+        return -1;
+    libUSB  = new QLibrary(libName);
+    libUSB->load();
+    bool bLoaded = libUSB->isLoaded();
+    if ( !bLoaded )
+        return -2;
+    Toggle_Func = (Toggle_Func_Type)libUSB->resolve("__Toggle");
+    if (!Toggle_Func) return -2;
+    rele_on = (rele_on_type)libUSB->resolve("_rele_on");
+    if (!rele_on) return -2;
+    rele_off = (rele_off_type)libUSB->resolve("_rele_off");
+    if (!rele_off) return -2;
+    GetDeviceCount = (GetDeviceCount_type)libUSB->resolve("_GetDeviceCount");
+    if (!GetDeviceCount) return -2;
+    rele_id_on = (rele_id_on_type)libUSB->resolve("_rele_id_on");
+    if (!rele_id_on) return -2;
+    rele_id_off = (rele_id_off_type)libUSB->resolve("_rele_id_off");
+    if (!rele_id_off) return -2;
+    rele_get_id = (rele_get_id_type)libUSB->resolve("_rele_get_id");
+    if (!rele_get_id) return -2;
+    free_mem = (free_mem_type)libUSB->resolve("_free_mem");
+    if (!free_mem) return -2;
+    return 0;
 }
 
 void MainWindow::handleErrorFromPort( QSerialPort::SerialPortError error) {
@@ -39,15 +129,14 @@ void MainWindow::readData() {
     const QByteArray data = m_serial->readAll();
     parseData p(data);
     connect(&p, &parseData::showData, this, &MainWindow::showString);
-    //connect(&p, &parseData::showData, ui->textEdit, &QTextEdit::insertPlainText);
     p.parser();
 }
 
 void MainWindow::showString( const QString &str ) {
     ui->textEdit->insertPlainText(str);
 
-//    QScrollBar *bar = verticalScrollBar();
-//    bar->setValue(bar->maximum());
+  //  QScrollBar *bar = verticalScrollBar();
+////    bar->setValue(bar->maximum());
 }
 
 void MainWindow::manageSerialPort() {
@@ -59,13 +148,14 @@ void MainWindow::manageSerialPort() {
     }
 }
 
+
+
 MainWindow::~MainWindow() {
     saveSettings();
     delete ui;
 }
 
 void MainWindow::openSerialPort() {
-    QString s  = ui->comboBox_3->currentText();
    if (!ui->comboBox_3->currentText().isEmpty())
        m_serial->setPortName( ui->comboBox_3->currentText() );
    else
@@ -129,6 +219,8 @@ void MainWindow::saveSettings() {
     setValueToIniFile("Settings", "GeometryY", MainWindow::geometry().y());
     setValueToIniFile("Settings", "Height", MainWindow::height());
     setValueToIniFile("Settings", "Width", MainWindow::width());
+    setValueToIniFile("WorkingDirectories", "Reports_path", ui->lineEdit->text());
+    setValueToIniFile("WorkingDirectories", "Capture_path", ui->lineEdit_2->text());
     ini_file.sync();
 }
 
@@ -145,7 +237,7 @@ void MainWindow::restoreSettings() {
     params.push_back(val);
     getValueFromIni("Settings", "Width", val);
     params.push_back(val);
-    MainWindow::setGeometry( params.at(0), params.at(1), params.at(2), params.at(3));
+    MainWindow::setGeometry( params.at(0), params.at(1), params.at(3), params.at(2));
 
     //В Windows 10 не прорисовываются кое-где границы
      if(QSysInfo::windowsVersion()==QSysInfo::WV_WINDOWS10){
@@ -166,6 +258,12 @@ void MainWindow::restoreSettings() {
                     "background-color:white;"
                 "}");
      }
+     QString str = nullptr;
+     getValueFromIni("WorkingDirectories", "Reports_path", str);
+     ui->lineEdit->setText(str);
+     getValueFromIni("WorkingDirectories", "Capture_path", str);
+     ui->lineEdit_2->setText(str);
+
 
 }
 
@@ -185,9 +283,9 @@ void MainWindow::connectInterface( bool setConnected ) {
 }
 
 void MainWindow::init_statusBar() {
-    QTimer *connectTimer = new QTimer(this);
-   //connect(connectTimer, &QTimer::timeout, this, &MainWindow::)
-    ui->statusbar->addWidget(new QLabel("00:00:00"));
+//    QTimer *connectTimer = new QTimer(this);
+//   //connect(connectTimer, &QTimer::timeout, this, &MainWindow::)
+//    ui->statusbar->addWidget(new QLabel("00:00:00"));
 
 }
 
@@ -236,21 +334,22 @@ void MainWindow::init_comboBoxes() {
      getValueFromIni("Settings", "Module_capacity", str);
      if (!str.isEmpty()) ui->comboBox_10->setCurrentText(str);
 
-//   connect(ui->comboBox_6, SIGNAL(currentIndexChanged(QString)),  &MainWindow::slotReWrSettingsInIni );
-//     connect(ui->comboBox_6, &QComboBox::currentIndexChanged, &MainWindow::slotReWrSettingsInIni);
-//    connect(ui->comboBox_7, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-//       connect(ui->comboBox_5, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-//       connect(ui->comboBox_4, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-//       connect(ui->comboBox_10, SIGNAL(currentIndexChanged(QString)),SLOT(slotReWrSettingsInIni(QString)));
-//       connect(ui->comboBox_9, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-//       connect(ui->comboBox_3, SIGNAL(currentIndexChanged(QString)), SLOT(slotReWrSettingsInIni(QString)));
-
 
 ////  connect(ui->comboBox)
 //          connect(ui->comboBox, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));;
 //       connect(ui->comboBox_2, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));
 }
 
+void MainWindow::slotSetWrkFilesDir() {
+    QLineEdit *ed=nullptr;
+    if (QObject::sender() == ui->pushButton_5) {
+        ed = ui->lineEdit;
+    } else if (QObject::sender() == ui->pushButton_6) {
+        ed = ui->lineEdit_2;
+    }
+    QString dir = QFileDialog::getExistingDirectory(0, QString(tr("Выберите каталог")));
+    if (ed) ed->setText( dir.isEmpty() ?  ed->text() : dir );
+}
 
 void MainWindow::slotReWrSettingsInIni( const QString & str ) {
     if (QObject::sender() == ui->comboBox_6) {
@@ -297,8 +396,9 @@ void MainWindow::setValidatorsFunc(const QObject *var) {
             ui->radioButton_16->setEnabled(true);
             cntResz=16;
         }
-        QValidator *numbersOnly = new QRegExpValidator(rx, this);
 
+
+        QValidator *numbersOnly = new QRegExpValidator(rx, this);
         for (int i=0; i<lineEdVect.count(); ++i)
             lineEdVect.at(i)->setValidator(numbersOnly);
 
@@ -312,6 +412,7 @@ void MainWindow::setValidatorsFunc(const QObject *var) {
                 }
             }
         }
+        delete numbersOnly;
     }
 }
 
@@ -370,21 +471,25 @@ void MainWindow::getValueFromIni( const QString & group, const QString &section,
 
 
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const QString &value ) {
+    qDebug() << value << "\n";
     ini_file.beginGroup(group);
     ini_file.setValue(section, value);
     ini_file.endGroup();
+    ini_file.sync();
 }
 
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const int &value ) {
     ini_file.beginGroup(group);
     ini_file.setValue(section, value);
     ini_file.endGroup();
+    ini_file.sync();
 }
 
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const bool &value ) {
     ini_file.beginGroup(group);
     ini_file.setValue(section, value);
     ini_file.endGroup();
+    ini_file.sync();
 }
 
 
