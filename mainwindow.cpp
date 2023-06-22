@@ -73,6 +73,24 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::addLineToTable(const QVector<QVector<QString>> &line) {
+    qDebug()  << "sssss\n";
+    ui->tabWidget->clear();
+    int i=0, j=0;
+    QTableWidgetItem *name;
+    for (i=0; i<line.size(); i++) {
+        for (j=0; j<4; j++) {
+            if (j==0) {
+                name = new QTableWidgetItem(line.at(i).at(0));
+            }
+            else {
+                if (line.at(i).at(j).isEmpty())
+                    name = new QTableWidgetItem("");
+                else
+                    name = new QTableWidgetItem(line.at(i).at(j));
+            }
+            ui->tableWidget->setItem(i, j, name);
+        }
+    }
 
 }
 
