@@ -1,13 +1,13 @@
 /********************************************************************************
-** Form generated from reading UI file 'mainwindowCXMAvb.ui'
+** Form generated from reading UI file 'mainwindowEkanOm.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.15.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef MAINWINDOWCXMAVB_H
-#define MAINWINDOWCXMAVB_H
+#ifndef MAINWINDOWEKANOM_H
+#define MAINWINDOWEKANOM_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
@@ -166,7 +166,7 @@ public:
     QSpacerItem *verticalSpacer_14;
     QTableWidget *tableWidget_2;
     QWidget *tab_2;
-    QWidget *widget;
+    QWidget *layoutWidget;
     QGridLayout *gridLayout_8;
     QHBoxLayout *horizontalLayout_30;
     QSpacerItem *horizontalSpacer_29;
@@ -996,6 +996,7 @@ public:
         QTableWidgetItem *__qtablewidgetitem3 = new QTableWidgetItem();
         tableWidget_2->setHorizontalHeaderItem(3, __qtablewidgetitem3);
         tableWidget_2->setObjectName(QString::fromUtf8("tableWidget_2"));
+        tableWidget_2->setSelectionBehavior(QAbstractItemView::SelectRows);
         tableWidget_2->setColumnCount(4);
 
         verticalLayout_2->addWidget(tableWidget_2);
@@ -1009,9 +1010,10 @@ public:
         tabWidget->addTab(tab_5, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName(QString::fromUtf8("tab_2"));
-        widget = new QWidget(tab_2);
-        widget->setObjectName(QString::fromUtf8("widget"));
-        gridLayout_8 = new QGridLayout(widget);
+        layoutWidget = new QWidget(tab_2);
+        layoutWidget->setObjectName(QString::fromUtf8("layoutWidget"));
+        layoutWidget->setGeometry(QRect(0, 0, 670, 370));
+        gridLayout_8 = new QGridLayout(layoutWidget);
         gridLayout_8->setObjectName(QString::fromUtf8("gridLayout_8"));
         gridLayout_8->setContentsMargins(0, 0, 0, 0);
         horizontalLayout_30 = new QHBoxLayout();
@@ -1020,7 +1022,7 @@ public:
 
         horizontalLayout_30->addItem(horizontalSpacer_29);
 
-        pushButton_21 = new QPushButton(widget);
+        pushButton_21 = new QPushButton(layoutWidget);
         pushButton_21->setObjectName(QString::fromUtf8("pushButton_21"));
         pushButton_21->setEnabled(false);
         pushButton_21->setMinimumSize(QSize(289, 26));
@@ -1039,7 +1041,7 @@ public:
         horizontalLayout_36->setObjectName(QString::fromUtf8("horizontalLayout_36"));
         verticalLayout_32 = new QVBoxLayout();
         verticalLayout_32->setObjectName(QString::fromUtf8("verticalLayout_32"));
-        groupBox = new QGroupBox(widget);
+        groupBox = new QGroupBox(layoutWidget);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
         groupBox->setMaximumSize(QSize(316, 16777215));
         gridLayout_7 = new QGridLayout(groupBox);
@@ -1174,7 +1176,7 @@ public:
         verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
         horizontalLayout_25 = new QHBoxLayout();
         horizontalLayout_25->setObjectName(QString::fromUtf8("horizontalLayout_25"));
-        label_27 = new QLabel(widget);
+        label_27 = new QLabel(layoutWidget);
         label_27->setObjectName(QString::fromUtf8("label_27"));
 
         horizontalLayout_25->addWidget(label_27);
@@ -1183,7 +1185,7 @@ public:
 
         horizontalLayout_25->addItem(horizontalSpacer_35);
 
-        label_28 = new QLabel(widget);
+        label_28 = new QLabel(layoutWidget);
         label_28->setObjectName(QString::fromUtf8("label_28"));
 
         horizontalLayout_25->addWidget(label_28);
@@ -1195,7 +1197,7 @@ public:
 
         verticalLayout_18->addLayout(horizontalLayout_25);
 
-        progressBar = new QProgressBar(widget);
+        progressBar = new QProgressBar(layoutWidget);
         progressBar->setObjectName(QString::fromUtf8("progressBar"));
         progressBar->setMaximumSize(QSize(314, 16));
         progressBar->setValue(0);
@@ -1211,7 +1213,7 @@ public:
 
         horizontalLayout_36->addLayout(verticalLayout_32);
 
-        groupBox_2 = new QGroupBox(widget);
+        groupBox_2 = new QGroupBox(layoutWidget);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
         groupBox_2->setMinimumSize(QSize(341, 246));
         groupBox_2->setMaximumSize(QSize(350, 290));
@@ -1432,7 +1434,6 @@ public:
 
         gridLayout_6->addLayout(verticalLayout_33, 0, 0, 1, 1);
 
-        widget->raise();
 
         horizontalLayout_36->addWidget(groupBox_2);
 
@@ -1457,18 +1458,18 @@ public:
         gridLayout_13->setContentsMargins(1, -1, -1, -1);
         horizontalLayout_16 = new QHBoxLayout();
         horizontalLayout_16->setObjectName(QString::fromUtf8("horizontalLayout_16"));
-        radioButton_3 = new QRadioButton(widget);
+        radioButton_3 = new QRadioButton(layoutWidget);
         radioButton_3->setObjectName(QString::fromUtf8("radioButton_3"));
         radioButton_3->setChecked(true);
 
         horizontalLayout_16->addWidget(radioButton_3);
 
-        radioButton_4 = new QRadioButton(widget);
+        radioButton_4 = new QRadioButton(layoutWidget);
         radioButton_4->setObjectName(QString::fromUtf8("radioButton_4"));
 
         horizontalLayout_16->addWidget(radioButton_4);
 
-        radioButton_5 = new QRadioButton(widget);
+        radioButton_5 = new QRadioButton(layoutWidget);
         radioButton_5->setObjectName(QString::fromUtf8("radioButton_5"));
 
         horizontalLayout_16->addWidget(radioButton_5);
@@ -1480,13 +1481,13 @@ public:
 
         gridLayout_13->addItem(horizontalSpacer_26, 0, 1, 1, 1);
 
-        CheckBox_1 = new QCheckBox(widget);
+        CheckBox_1 = new QCheckBox(layoutWidget);
         CheckBox_1->setObjectName(QString::fromUtf8("CheckBox_1"));
         CheckBox_1->setEnabled(false);
 
         gridLayout_13->addWidget(CheckBox_1, 0, 2, 1, 1);
 
-        pushButton_7 = new QPushButton(widget);
+        pushButton_7 = new QPushButton(layoutWidget);
         pushButton_7->setObjectName(QString::fromUtf8("pushButton_7"));
         QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Minimum);
         sizePolicy2.setHorizontalStretch(0);
@@ -1517,7 +1518,6 @@ public:
         gridLayout_8->addLayout(verticalLayout_34, 0, 0, 1, 1);
 
         tabWidget->addTab(tab_2, QString());
-        widget->raise();
         tab_3 = new QWidget();
         tab_3->setObjectName(QString::fromUtf8("tab_3"));
         gridLayout_11 = new QGridLayout(tab_3);
@@ -2139,4 +2139,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // MAINWINDOWCXMAVB_H
+#endif // MAINWINDOWEKANOM_H

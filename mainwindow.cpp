@@ -12,12 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     init_comboBoxes();
     init_statusBar();
     restoreSettings();
-
-
-
-
-
-
+    createCmdMem();
 
     lineEdVect.append(ui->lineEdit_4);
     lineEdVect.append(ui->lineEdit_5);
@@ -60,52 +55,52 @@ MainWindow::MainWindow(QWidget *parent)
      connect(ui->pushButton_5, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
      connect(ui->pushButton_6, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
      connect(ui->pushButton_29, &QPushButton::clicked, this, &MainWindow::openButtonClicked);
+
     //Библиотека USB
-    int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
-    if (bLoad == -1) {
-       QMessageBox::critical(0, "MonServ",
-              QString(tr("Библиотека MP709.dll не обнаружена в каталоге %1")).arg( QDir::currentPath().toUtf8().data()),
-              QMessageBox::Ok);
-    }
-    else if (bLoad == -2)
-        QMessageBox::critical(0, "MonServ", tr("Ошибка при подгрузке функций"), QMessageBox::Ok);
+//    int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
+//    if (bLoad == -1) {
+//       QMessageBox::critical(0, "MonServ",
+//              QString(tr("Библиотека MP709.dll не обнаружена в каталоге %1")).arg( QDir::currentPath().toUtf8().data()),
+//              QMessageBox::Ok);
+//    }
+//    else if (bLoad == -2)
+//        QMessageBox::critical(0, "MonServ", tr("Ошибка при подгрузке функций"), QMessageBox::Ok);
 
 }
 
-void MainWindow::addLineToTable(const QVector<QVector<QString>> &line) {
-    qDebug()  << "sssss\n";
-    ui->tabWidget->clear();
-    int i=0, j=0;
-    QTableWidgetItem *name;
-    for (i=0; i<line.size(); i++) {
-        for (j=0; j<4; j++) {
-            if (j==0) {
-                name = new QTableWidgetItem(line.at(i).at(0));
-            }
-            else {
-                if (line.at(i).at(j).isEmpty())
-                    name = new QTableWidgetItem("");
-                else
-                    name = new QTableWidgetItem(line.at(i).at(j));
-            }
-            ui->tableWidget->setItem(i, j, name);
-        }
-    }
+void MainWindow::addLineToTable(const QVector<QVector<QString>> &lines) {
+    ui->tableWidget_2->setRowCount(lines.size());
+    ui->tableWidget_2->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
 
+    for (int i=0; i<lines.size(); ++i) {
+        for (int j=0; j<4; ++j) {
+            QTableWidgetItem *item = new QTableWidgetItem(lines.at(i).at(j));
+            ui->tableWidget_2->setItem(i, j, item);
+       }
+    }
 }
 
 void MainWindow::openButtonClicked() {
     QString filename = QFileDialog::getOpenFileName(0, "OpenDialog", QDir::currentPath(), "*.dbg");
     if (!filename.isEmpty()){
         ui->comboBox_8->insertItem(0,filename);
-        Script s(filename);
-        connect(&s, &Script::addLine, this, &MainWindow::addLineToTable );
-
-
-
-
-
+        //RAII
+        DbgClass openS(filename, mCmd);
+        tableLines = openS.showTable();
+        addLineToTable(tableLines);
     }
+
+}
+
+void MainWindow::createCmdMem() {
+    mCmd.insert("j", useFields("Jump", 1, 0, 1));
+    mCmd.insert("to", useFields("Text Out", 0, 0, 1));
+    mCmd.insert("ja", useFields("Jump To Address", 1, 1, 1));
+    mCmd.insert("cl", useFields("Call", 1, 0, 1));
+    mCmd.insert("r", useFields("Ret", 0, 0, 1));
+    mCmd.insert("lf", useFields("Load File", 1, 1, 1));
+    mCmd.insert("mw", useFields("Memory Write", 1, 1, 1));
+
 
 }
 
@@ -148,6 +143,11 @@ void MainWindow::readData() {
     parseData p(data);
     connect(&p, &parseData::showData, this, &MainWindow::showString);
     p.parser();
+}
+
+void MainWindow::showString2( ) {
+    ui->textEdit->insertPlainText("slot");
+
 }
 
 void MainWindow::showString( const QString &str ) {
@@ -489,7 +489,6 @@ void MainWindow::getValueFromIni( const QString & group, const QString &section,
 
 
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const QString &value ) {
-    qDebug() << value << "\n";
     ini_file.beginGroup(group);
     ini_file.setValue(section, value);
     ini_file.endGroup();

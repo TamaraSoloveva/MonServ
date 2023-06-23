@@ -2,24 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSettings>
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
-#include <QVector>
-#include <QShortcut>
-#include <QMessageBox>
-#include <QTimer>
-#include <QPlainTextEdit>
-#include <QScrollBar>
-#include <QDir>
-#include <QLibrary>
-#include <QFileDialog>
+
 
 #include "parseData.h"
 #include "script.h"
 
 #include <QDebug>
 #include "ui_MonServ.h"
+#include "common.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,6 +17,8 @@ QT_END_NAMESPACE
 
 class Ui_MainWindow;
 class Script;
+
+
 
 class MainWindow : public QMainWindow, public Ui_MainWindow
 {
@@ -42,8 +34,10 @@ private:
     QSerialPort *m_serial = nullptr;
     QVector<QLineEdit *>lineEdVect;
     QLibrary *libUSB;
-
+    QVector<QVector<QString>>tableLines;
     Script *fl;
+    useFields info;
+    QMap<QString, useFields> mCmd;
 
 
 
@@ -53,6 +47,7 @@ private:
     void readData();
     void connectInterface( bool setConnected );
     int LoadUSBLib(const QString & libName);
+    void createCmdMem();
 
 
 
@@ -104,9 +99,12 @@ private slots:
     void openButtonClicked();
 
 
+
 public slots:
     void showString( const QString &str);
+    void showString2( ) ;
     void addLineToTable(const QVector<QVector<QString> > &line);
+
 
 
 
