@@ -145,16 +145,9 @@ void MainWindow::readData() {
     p.parser();
 }
 
-void MainWindow::showString2( ) {
-    ui->textEdit->insertPlainText("slot");
-
-}
 
 void MainWindow::showString( const QString &str ) {
     ui->textEdit->insertPlainText(str);
-
-  //  QScrollBar *bar = verticalScrollBar();
-////    bar->setValue(bar->maximum());
 }
 
 void MainWindow::manageSerialPort() {
@@ -177,10 +170,14 @@ void MainWindow::openSerialPort() {
    if (!ui->comboBox_3->currentText().isEmpty())
        m_serial->setPortName( ui->comboBox_3->currentText() );
    else
-       return;
+       throw std::invalid_argument("Input seral port name");
 
+   if (ui->comboBox_4->currentText().isEmpty())
+        throw std::invalid_argument("Input seral port baud rate");
    m_serial->setBaudRate( ui->comboBox_4->currentText().toInt());
 
+   if ( ui->comboBox_7->currentText().isEmpty() )
+       throw std::invalid_argument("Input seral port stop bits number");
    float stop_v = ui->comboBox_7->currentText().toFloat();
    if  (stop_v == 1)
         m_serial->setStopBits(QSerialPort::OneStop);
@@ -191,6 +188,8 @@ void MainWindow::openSerialPort() {
    else
        m_serial->setStopBits(QSerialPort::OneStop);
 
+   if ( ui->comboBox_6->currentText().isEmpty() )
+       throw std::invalid_argument("Input seral port stop parity");
    QString par_str = ui->comboBox_6->currentText();
    if (par_str == "No")
         m_serial->setParity( QSerialPort::NoParity);
@@ -200,6 +199,8 @@ void MainWindow::openSerialPort() {
        m_serial->setParity ( QSerialPort::OddParity);
    else m_serial->setParity( QSerialPort::NoParity);
 
+   if ( ui->comboBox_5->currentText().isEmpty() )
+       throw std::invalid_argument("Input seral port data_bits");
    qint32 data_bits = ui->comboBox_5->currentText().toInt();
    if (data_bits == 5 )
        m_serial->setDataBits(QSerialPort::Data5);
@@ -218,7 +219,6 @@ void MainWindow::openSerialPort() {
         connectInterface(true);
    } else {
        QMessageBox::critical(this, tr("Error"), m_serial->errorString());
-
    }
 }
 
@@ -351,11 +351,6 @@ void MainWindow::init_comboBoxes() {
      ui->comboBox_10->addItems(lst);
      getValueFromIni("Settings", "Module_capacity", str);
      if (!str.isEmpty()) ui->comboBox_10->setCurrentText(str);
-
-
-////  connect(ui->comboBox)
-//          connect(ui->comboBox, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));;
-//       connect(ui->comboBox_2, SIGNAL(activated(QString)), SLOT(slotComboTextChanged()));
 }
 
 void MainWindow::slotSetWrkFilesDir() {

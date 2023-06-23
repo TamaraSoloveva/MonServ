@@ -13,6 +13,13 @@
 #include <QLibrary>
 #include <QFileDialog>
 #include <QMultiMap>
+#include <QString>
+#include <QTableWidget>
+#include <iostream>
+#include <QFile>
+#include <QDebug>
+#include <QChar>
+#include <QTextCodec>
 
 struct useFields {
     useFields(const QString &str, bool use1, bool use2, bool use3) : fullName(str), addrField(use1),

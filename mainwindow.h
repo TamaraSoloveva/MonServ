@@ -102,7 +102,6 @@ private slots:
 
 public slots:
     void showString( const QString &str);
-    void showString2( ) ;
     void addLineToTable(const QVector<QVector<QString> > &line);
 
 

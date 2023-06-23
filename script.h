@@ -1,19 +1,10 @@
 #pragma once
-#include <QObject>
-#include <QTableWidget>
-#include <iostream>
-#include <QFile>
-#include <QDebug>
-#include <QChar>
-#include <QTextCodec>
+
 #include "common.h"
-
-
-
 
 class DbgClass {
 public:
-    explicit DbgClass(const QString &name, const QMap<QString, useFields> &cmdMap);
+    explicit DbgClass(const QString &name, const QMap<QString, useFields> &cmdMap = {});
     ~DbgClass();
      QVector<QVector<QString>>  showTable();
 
