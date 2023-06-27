@@ -25,8 +25,17 @@ struct useFields {
     useFields(const QString &str, bool use1, bool use2, bool use3) : fullName(str), addrField(use1),
         dataField(use2),commField(use3)  {}
     useFields() {}
+
     QString fullName;
     bool addrField;
     bool dataField;
     bool commField;
 };
+
+#define MODNAME_KEY "ModName"
+#define MODNMBS_KEY "ModNumbers"
+#define STNDNAME_KEY "StendName"
+#define INDX_KEY "Indexes"
+#define MOD_CODES "ModuleCodes"
+#define MOD_CODES_FILED "code"
+#define SKRPTNAME_KEY "ScriptList"

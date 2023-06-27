@@ -2,11 +2,16 @@
 
 
 
+
 #include <QAbstractScrollArea>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), ini_file(QApplication::applicationDirPath() + "/MonServ.ini"),
       m_serial(new QSerialPort(this)), fl(nullptr) {
+
+
+
+
 
     ui->setupUi(this);
     init_comboBoxes();
@@ -46,15 +51,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->comboBox_3,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
 
-    connect(ui->lineEdit, &QLineEdit::textChanged, [this, str = ui->lineEdit->text() ](){ setValueToIniFile("WorkingDirectories", "Reports_path", str);} );
-    connect(ui->lineEdit_2, &QLineEdit::textChanged, [this, str = ui->lineEdit_2->text()]{ setValueToIniFile("WorkingDirectories", "Capture_path", str);} );
-//    connect(action_3, &QAction::triggered, [this]() {ui->lineEdit_2->text( QDir::currentPath());
+    connect(ui->lineEdit, &QLineEdit::textChanged, this, [this, str = ui->lineEdit->text() ](){ setValueToIniFile("WorkingDirectories", "Reports_path", str);} );
+    connect(ui->lineEdit_2, &QLineEdit::textChanged, this, [this, str = ui->lineEdit_2->text()]{ setValueToIniFile("WorkingDirectories", "Capture_path", str);} );
+//  connect(action_3, &QAction::triggered, [this]() {ui->lineEdit_2->text( QDir::currentPath());
 //                ui->lineEdit_1->text( QDir::currentPath());});
+    connect(ui->checkBox_10, &QCheckBox::clicked, this,  [this] {ui->checkBox_10->isChecked() ? ui->lineEdit_18->setEnabled(true) : ui->lineEdit_18->setEnabled(false); });
 
 
      connect(ui->pushButton_5, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
      connect(ui->pushButton_6, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
-     connect(ui->pushButton_29, &QPushButton::clicked, this, &MainWindow::openButtonClicked);
+     connect(ui->action_5, &QAction::triggered, this, &MainWindow::openButtonClicked);
 
     //Библиотека USB
 //    int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
@@ -70,7 +76,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::addLineToTable(const QVector<QVector<QString>> &lines) {
     ui->tableWidget_2->setRowCount(lines.size());
-    ui->tableWidget_2->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
+//    ui->tableWidget_2->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
+//    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+
 
     for (int i=0; i<lines.size(); ++i) {
         for (int j=0; j<4; ++j) {
@@ -78,6 +86,7 @@ void MainWindow::addLineToTable(const QVector<QVector<QString>> &lines) {
             ui->tableWidget_2->setItem(i, j, item);
        }
     }
+
 }
 
 void MainWindow::openButtonClicked() {
@@ -162,6 +171,7 @@ void MainWindow::manageSerialPort() {
 
 
 MainWindow::~MainWindow() {
+
     saveSettings();
     delete ui;
 }
@@ -229,6 +239,45 @@ void MainWindow::closeSerialPort() {
     }
 
 }
+void MainWindow::slotWriteComboToIni(const QString &keyName, QComboBox *cmb) {
+    ini_file.remove(keyName);
+    int sz = cmb->count();
+    ini_file.beginWriteArray(keyName);
+    QStringList lst;
+    for (int i = 0; i < sz; ++i) {
+        lst<<cmb->itemText(i);
+    }
+    lst=lst.toSet().toList();
+    int  i = 0;
+    for (auto  str : lst ) {
+        ini_file.setArrayIndex(i);
+        ini_file.setValue("name", lst.at(i));
+        i++;
+    }
+    ini_file.endArray();
+    ini_file.sync();
+}
+
+void MainWindow::slotReadFromIniToCombo(QComboBox *cmb) {
+    QString keyNm;
+    if (cmb == ui->comboBox) keyNm = MODNAME_KEY;
+    else if (cmb == ui->comboBox_2) keyNm = MODNMBS_KEY;
+    else if (cmb == ui->comboBox_11) keyNm = STNDNAME_KEY;
+    else if (cmb == ui->comboBox_8) keyNm = SKRPTNAME_KEY;
+    else if (cmb == ui->comboBox_13) keyNm = SKRPTNAME_KEY;
+
+    int sz=ini_file.beginReadArray(keyNm);
+    for (int i=0; i<sz; ++i) {
+        ini_file.setArrayIndex(i);
+        cmb->addItem(ini_file.value("name").toString());
+    }
+    ini_file.endArray();
+    if (sz) {
+        int currInd = 0;
+        getValueFromIni(INDX_KEY, keyNm, currInd );
+        if (currInd <= sz ) cmb->setCurrentIndex(currInd);
+    }
+}
 
 
 void MainWindow::saveSettings() {
@@ -239,6 +288,8 @@ void MainWindow::saveSettings() {
     setValueToIniFile("Settings", "Width", MainWindow::width());
     setValueToIniFile("WorkingDirectories", "Reports_path", ui->lineEdit->text());
     setValueToIniFile("WorkingDirectories", "Capture_path", ui->lineEdit_2->text());
+    setValueToIniFile("WorkingDirectories", "Capture_path", ui->lineEdit_2->text());
+    slotWriteComboToIni(SKRPTNAME_KEY, ui->comboBox_8);
     ini_file.sync();
 }
 
@@ -281,8 +332,8 @@ void MainWindow::restoreSettings() {
      ui->lineEdit->setText(str);
      getValueFromIni("WorkingDirectories", "Capture_path", str);
      ui->lineEdit_2->setText(str);
-
-
+     //список сценариев
+     slotReadFromIniToCombo(ui->comboBox_8);
 }
 
 void MainWindow::connectInterface( bool setConnected ) {

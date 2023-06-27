@@ -8,6 +8,7 @@
 #include "script.h"
 
 #include <QDebug>
+#include <QSplitter>
 #include "ui_MonServ.h"
 #include "common.h"
 
@@ -30,6 +31,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QSplitter *h1Splitter, *h2Splitter;
     QSettings ini_file;
     QSerialPort *m_serial = nullptr;
     QVector<QLineEdit *>lineEdVect;
@@ -91,6 +93,8 @@ private slots:
     void manageSerialPort();
     void handleErrorFromPort(QSerialPort::SerialPortError error);
     void slotSetWrkFilesDir();
+    void slotReadFromIniToCombo(QComboBox *cmb);
+    void slotWriteComboToIni(const QString &keyName, QComboBox *cmb);
 
     void setValueToIniFile( const QString &group, const QString &section, const QString &val );
     void setValueToIniFile( const QString &group, const QString &section, const bool &val );
