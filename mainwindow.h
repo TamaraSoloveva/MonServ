@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QSplitter>
+#include <QToolBar>
 #include "ui_MonServ.h"
 #include "common.h"
 
@@ -41,6 +42,9 @@ private:
     useFields info;
     QMap<QString, useFields> mCmd;
 
+    void createToolBars();
+    QToolBar *scriptToolBar;
+
 
 
     void openSerialPort();
@@ -50,6 +54,7 @@ private:
     void connectInterface( bool setConnected );
     int LoadUSBLib(const QString & libName);
     void createCmdMem();
+
 
 
 
@@ -101,6 +106,7 @@ private slots:
     void setValueToIniFile( const QString &group, const QString &section, const int &val );
 
     void openButtonClicked();
+    void showScript(const QString &filename);
 
 
 

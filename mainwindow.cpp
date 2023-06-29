@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     ui->setupUi(this);
+
     init_comboBoxes();
     init_statusBar();
     restoreSettings();
@@ -61,6 +62,8 @@ MainWindow::MainWindow(QWidget *parent)
      connect(ui->pushButton_5, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
      connect(ui->pushButton_6, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
      connect(ui->action_5, &QAction::triggered, this, &MainWindow::openButtonClicked);
+     connect(ui->comboBox_8,  static_cast<void(QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this, &MainWindow::showScript);
+
 
     //Библиотека USB
 //    int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
@@ -74,31 +77,53 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+void MainWindow::createToolBars() {
+
+  ui->toolBar->addAction(new QAction(tr("Очистить экран"), this));
+  QLabel *lbl = new QLabel("aaaaaaaa");
+  ui->toolBar->addWidget(lbl);
+
+}
+
 void MainWindow::addLineToTable(const QVector<QVector<QString>> &lines) {
     ui->tableWidget_2->setRowCount(lines.size());
-//    ui->tableWidget_2->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
-//    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-
-
     for (int i=0; i<lines.size(); ++i) {
         for (int j=0; j<4; ++j) {
             QTableWidgetItem *item = new QTableWidgetItem(lines.at(i).at(j));
             ui->tableWidget_2->setItem(i, j, item);
        }
     }
+    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode( 2, QHeaderView::Stretch);
+}
 
+void MainWindow::showScript(const QString &filename) {
+    QList<QString>names;
+    for (int i = 0; i < ui->comboBox_8->count(); ++i) {
+         names.push_back(ui->comboBox_8->itemText(i));
+    }
+    int ind = names.indexOf(filename);
+    qDebug() << ind;
+    if ((ind != -1) && (ind)) {
+        names.swap(0, ind);
+    //    ui->comboBox_8->clear();
+     //   ui->comboBox_8->addItems(names);
+    }
+    else {
+ //       ui->comboBox_8->insertItem(0, filename);
+    }
+  //  ui->comboBox_8->setCurrentIndex(0);
+    qDebug() << "\n Here!\n";
+
+    DbgClass openS(filename, mCmd);
+    tableLines = openS.showTable();
+    addLineToTable(tableLines);
 }
 
 void MainWindow::openButtonClicked() {
     QString filename = QFileDialog::getOpenFileName(0, "OpenDialog", QDir::currentPath(), "*.dbg");
     if (!filename.isEmpty()){
-        ui->comboBox_8->insertItem(0,filename);
-        //RAII
-        DbgClass openS(filename, mCmd);
-        tableLines = openS.showTable();
-        addLineToTable(tableLines);
+        showScript(filename);
     }
-
 }
 
 void MainWindow::createCmdMem() {

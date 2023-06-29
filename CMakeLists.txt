@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets  REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
@@ -16,7 +18,12 @@ find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 
 set(PROJECT_SOURCES
         main.cpp mainwindow.cpp mainwindow.h ui_MonServ.h outTimerClass.cpp outTimerClass.h parseData.cpp parseData.h
-        script.cpp script.h common.h)
+        script.cpp script.h common.h )
+
+
+qt5_add_resources(RSS_SOURCES resources.qrc)
+
+
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(MonServ
@@ -37,6 +44,7 @@ else()
     else()
         add_executable(MonServ
             ${PROJECT_SOURCES}
+            ${RSS_SOURCES}
         )
     endif()
 endif()
@@ -54,6 +62,7 @@ set_target_properties(MonServ PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+
 #enable_testing(true)
 
 #add_subdirectory(Q_tst)
@@ -61,3 +70,4 @@ set_target_properties(MonServ PROPERTIES
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(MonServ)
 endif()
+
