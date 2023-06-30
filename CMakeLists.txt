@@ -23,8 +23,6 @@ set(PROJECT_SOURCES
 
 qt5_add_resources(RSS_SOURCES resources.qrc)
 
-
-
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(MonServ
         MANUAL_FINALIZATION

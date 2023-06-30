@@ -475,14 +475,14 @@ void MainWindow::setValidatorsFunc(const QObject *var) {
         int cntResz=8;
         if (ui->comboBox_10->currentText() == "32 bits") {
             rx = QRegExp("[0-9a-fA-F]{8}");
-            ui->radioButton_9->setEnabled(false);
-            ui->radioButton_16->setEnabled(false);
+//            ui->radioButton_9->setEnabled(false);
+//            ui->radioButton_16->setEnabled(false);
             cntResz=8;
         }
         else {
             rx = QRegExp("[0-9a-fA-F]{16}");
-            ui->radioButton_9->setEnabled(true);
-            ui->radioButton_16->setEnabled(true);
+//            ui->radioButton_9->setEnabled(true);
+//            ui->radioButton_16->setEnabled(true);
             cntResz=16;
         }
 
