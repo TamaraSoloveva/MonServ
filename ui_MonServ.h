@@ -1,13 +1,13 @@
 /********************************************************************************
-** Form generated from reading UI file 'MonServmSaqhb.ui'
+** Form generated from reading UI file 'MonServriVdsW.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.15.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef MONSERVMSAQHB_H
-#define MONSERVMSAQHB_H
+#ifndef MONSERVRIVDSW_H
+#define MONSERVRIVDSW_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
@@ -71,6 +71,11 @@ public:
     QAction *action_IP;
     QAction *action_IP_2;
     QAction *action_IP_3;
+    QAction *action_15;
+    QAction *action_16;
+    QAction *action_17;
+    QAction *action_18;
+    QAction *action_19;
     QWidget *centralwidget;
     QGridLayout *gridLayout_11;
     QGridLayout *gridLayout_10;
@@ -310,6 +315,7 @@ public:
     QMenu *menu_9;
     QMenu *menuIP;
     QMenu *menu_4;
+    QMenu *menu_11;
     QToolBar *toolBar;
     QStatusBar *statusBar;
     QToolBar *toolBar_2;
@@ -415,6 +421,16 @@ public:
         action_IP_2->setObjectName(QString::fromUtf8("action_IP_2"));
         action_IP_3 = new QAction(MainWindow);
         action_IP_3->setObjectName(QString::fromUtf8("action_IP_3"));
+        action_15 = new QAction(MainWindow);
+        action_15->setObjectName(QString::fromUtf8("action_15"));
+        action_16 = new QAction(MainWindow);
+        action_16->setObjectName(QString::fromUtf8("action_16"));
+        action_17 = new QAction(MainWindow);
+        action_17->setObjectName(QString::fromUtf8("action_17"));
+        action_18 = new QAction(MainWindow);
+        action_18->setObjectName(QString::fromUtf8("action_18"));
+        action_19 = new QAction(MainWindow);
+        action_19->setObjectName(QString::fromUtf8("action_19"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         centralwidget->setMinimumSize(QSize(720, 611));
@@ -1788,6 +1804,8 @@ public:
         menuIP->setObjectName(QString::fromUtf8("menuIP"));
         menu_4 = new QMenu(menuBar);
         menu_4->setObjectName(QString::fromUtf8("menu_4"));
+        menu_11 = new QMenu(menuBar);
+        menu_11->setObjectName(QString::fromUtf8("menu_11"));
         MainWindow->setMenuBar(menuBar);
         toolBar = new QToolBar(MainWindow);
         toolBar->setObjectName(QString::fromUtf8("toolBar"));
@@ -1808,6 +1826,7 @@ public:
         menuBar->addAction(menu_2->menuAction());
         menuBar->addAction(menu_4->menuAction());
         menuBar->addAction(menu->menuAction());
+        menuBar->addAction(menu_11->menuAction());
         menu->addAction(menu_5->menuAction());
         menu_5->addAction(menu_6->menuAction());
         menu_5->addAction(menu_7->menuAction());
@@ -1842,6 +1861,8 @@ public:
         menu_4->addAction(action_6);
         menu_4->addAction(action_7);
         menu_4->addAction(action_8);
+        menu_11->addAction(action_18);
+        menu_11->addAction(action_19);
         toolBar->addSeparator();
         toolBar->addAction(action_5);
         toolBar->addAction(action_6);
@@ -1856,7 +1877,7 @@ public:
         retranslateUi(MainWindow);
 
         pushButton->setDefault(true);
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(2);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -1914,6 +1935,11 @@ public:
         action_IP->setText(QCoreApplication::translate("MainWindow", "\320\222\320\272\320\273. \321\200\320\265\320\266\320\270\320\274 \320\276\321\202\320\273\320\260\320\264\320\272\320\270 IP-\320\260\320\264\321\200\320\265\321\201\320\260", nullptr));
         action_IP_2->setText(QCoreApplication::translate("MainWindow", "\320\236\320\261\320\275\320\276\320\262\320\270\321\202\321\214 IP-\320\260\320\264\321\200\320\265\321\201", nullptr));
         action_IP_3->setText(QCoreApplication::translate("MainWindow", "\320\240\320\265\320\264\320\260\320\272\321\202\320\270\321\200\320\276\320\262\320\260\321\202\321\214 IP-\320\260\320\264\321\200\320\265\321\201", nullptr));
+        action_15->setText(QCoreApplication::translate("MainWindow", "\320\247\321\202\320\265\320\275\320\270\320\265 \320\270 \320\267\320\260\320\277\320\270\321\201\321\214", nullptr));
+        action_16->setText(QCoreApplication::translate("MainWindow", "\320\247\321\202\320\265\320\275\320\270\320\265 \320\270 \320\267\320\260\320\277\320\270\321\201\321\214 \320\262 \321\204\320\260\320\271\320\273", nullptr));
+        action_17->setText(QCoreApplication::translate("MainWindow", "\320\247\321\202\320\265\320\275\320\270\320\265 \320\270 \320\267\320\260\320\277\320\270\321\201\321\214", nullptr));
+        action_18->setText(QCoreApplication::translate("MainWindow", "\320\240\320\260\320\261\320\276\321\202\320\260 \321\201 \320\277\320\260\320\274\321\217\321\202\321\214\321\216", nullptr));
+        action_19->setText(QCoreApplication::translate("MainWindow", "\320\240\320\260\320\261\320\276\321\202\320\260 \321\201 I/O", nullptr));
         label_2->setText(QCoreApplication::translate("MainWindow", "\320\234\320\276\320\264\321\203\320\273\321\214/\320\230\320\267\320\264\320\265\320\273\320\270\320\265", nullptr));
         label_3->setText(QCoreApplication::translate("MainWindow", "\320\235\320\276\320\274\320\265\321\200", nullptr));
         pushButton->setText(QCoreApplication::translate("MainWindow", "\320\237\320\276\320\264\320\272\320\273\321\216\321\207\320\270\321\202\321\214\321\201\321\217", nullptr));
@@ -2024,6 +2050,7 @@ public:
         menu_9->setTitle(QCoreApplication::translate("MainWindow", "\320\244\320\260\320\271\320\273 \320\276\321\202\321\207\320\265\321\202\320\260", nullptr));
         menuIP->setTitle(QCoreApplication::translate("MainWindow", "IP-\320\260\320\264\321\200\320\265\321\201 \320\237\320\232", nullptr));
         menu_4->setTitle(QCoreApplication::translate("MainWindow", "\320\241\321\206\320\265\320\275\320\260\321\200\320\270\320\271", nullptr));
+        menu_11->setTitle(QCoreApplication::translate("MainWindow", "\320\247\321\202\320\265\320\275\320\270\320\265 / \320\267\320\260\320\277\320\270\321\201\321\214", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar", nullptr));
         toolBar_2->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar_2", nullptr));
     } // retranslateUi
@@ -2036,4 +2063,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // MONSERVMSAQHB_H
+#endif // MONSERVRIVDSW_H

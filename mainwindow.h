@@ -11,14 +11,24 @@
 #include <QSplitter>
 #include <QToolBar>
 #include "ui_MonServ.h"
+#include "ui_memWrRd.h"
+#include "ui_portWrRd.h"
 #include "common.h"
+#include "memloadfile.h"
+
+
+
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+
 class Ui_MainWindow;
 class Script;
+class Ui_Form_Mem;
+class Ui_Form_Port;
 
 
 
@@ -29,9 +39,14 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
+    QWidget *memForm, *portForm;
+    Ui_Form_Mem *ui_mem;
+    Ui_Form_Port *ui_port;
     QSplitter *h1Splitter, *h2Splitter;
     QSettings ini_file;
     QSerialPort *m_serial = nullptr;
@@ -45,8 +60,6 @@ private:
     void createToolBars();
     QToolBar *scriptToolBar;
 
-
-
     void openSerialPort();
     void closeSerialPort();
     void writeData(const QByteArray &data);
@@ -54,13 +67,6 @@ private:
     void connectInterface( bool setConnected );
     int LoadUSBLib(const QString & libName);
     void createCmdMem();
-
-
-
-
-
-
-
 
     void init_comboBoxes();
     void init_statusBar();
@@ -73,7 +79,6 @@ private:
     void getValueFromIni(const QString &group, const QString &section, int &value);
     void getValueFromIni(const QString &group, const QString &section, bool &value);
     void getValueFromIni(const QString &group, const QString &section, QString &value);
-
 
 
     typedef bool (*Toggle_Func_Type)( bool state );
@@ -100,6 +105,7 @@ private slots:
     void slotSetWrkFilesDir();
     void slotReadFromIniToCombo(QComboBox *cmb);
     void slotWriteComboToIni(const QString &keyName, QComboBox *cmb);
+    void selectFileMemOp();
 
     void setValueToIniFile( const QString &group, const QString &section, const QString &val );
     void setValueToIniFile( const QString &group, const QString &section, const bool &val );
@@ -108,14 +114,14 @@ private slots:
     void openButtonClicked();
     void showScript(const QString &filename);
 
+    void showMemForm();
+    void showPortForm();
+
 
 
 public slots:
     void showString( const QString &str);
     void addLineToTable(const QVector<QVector<QString> > &line);
-
-
-
 
 
 signals:

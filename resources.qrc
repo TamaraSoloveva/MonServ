@@ -24,4 +24,5 @@
         <file>pics/new.png</file>
         <file>pics/play_2.png</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

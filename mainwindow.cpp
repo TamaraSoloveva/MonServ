@@ -9,10 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), ini_file(QApplication::applicationDirPath() + "/MonServ.ini"),
       m_serial(new QSerialPort(this)), fl(nullptr) {
 
-
-
-
-
     ui->setupUi(this);
 
     init_comboBoxes();
@@ -22,12 +18,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     lineEdVect.append(ui->lineEdit_4);
     lineEdVect.append(ui->lineEdit_5);
-    lineEdVect.append(ui->lineEdit_6);
-    lineEdVect.append(ui->lineEdit_7);
     lineEdVect.append(ui->lineEdit_9);
     lineEdVect.append(ui->lineEdit_10);
-    lineEdVect.append(ui->lineEdit_11);
     lineEdVect.append(ui->lineEdit_12);
+    lineEdVect.append(ui->lineEdit_14);
+    lineEdVect.append(ui->lineEdit_15);
+    lineEdVect.append(ui->lineEdit_20);
 
 
 
@@ -35,22 +31,27 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleErrorFromPort);
     connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
 
-    connect(ui->comboBox_6,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
-            this, &MainWindow::slotReWrSettingsInIni);
-    connect(ui->comboBox_8,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
-            this, &MainWindow::slotReWrSettingsInIni);
-    connect(ui->comboBox_7,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
-            this, &MainWindow::slotReWrSettingsInIni);
-    connect(ui->comboBox_5,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+
+
+
+    connect(ui->comboBox_3,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
     connect(ui->comboBox_4,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
-    connect(ui->comboBox_10,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+    connect(ui->comboBox_5,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_6,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_7,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui->comboBox_8,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
     connect(ui->comboBox_9,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
-    connect(ui->comboBox_3,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+    connect(ui->comboBox_10,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
+
+
 
     connect(ui->lineEdit, &QLineEdit::textChanged, this, [this, str = ui->lineEdit->text() ](){ setValueToIniFile("WorkingDirectories", "Reports_path", str);} );
     connect(ui->lineEdit_2, &QLineEdit::textChanged, this, [this, str = ui->lineEdit_2->text()]{ setValueToIniFile("WorkingDirectories", "Capture_path", str);} );
@@ -63,6 +64,14 @@ MainWindow::MainWindow(QWidget *parent)
      connect(ui->pushButton_6, &QPushButton::clicked, this, &MainWindow::slotSetWrkFilesDir);
      connect(ui->action_5, &QAction::triggered, this, &MainWindow::openButtonClicked);
      connect(ui->comboBox_8,  static_cast<void(QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this, &MainWindow::showScript);
+
+     connect(ui->action_18, &QAction::triggered, this, &MainWindow::showMemForm);
+     connect(ui->action_19, &QAction::triggered, this, &MainWindow::showPortForm);
+
+     portForm = nullptr;
+     memForm = nullptr;
+
+
 
 
     //Библиотека USB
@@ -77,8 +86,64 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
-void MainWindow::createToolBars() {
 
+void MainWindow::showMemForm() {
+    ui_mem = new Ui_Form_Mem;
+    memForm = new QWidget;
+    ui_mem->setupUi(memForm);
+    memForm->show();
+    ui_mem->pushButton_7->setEnabled(false);
+    QString str = nullptr;
+    getValueFromIni( "Label_mem", "Addr from", str );
+    ui_mem->lineEdit_5->setText(str);
+    getValueFromIni( "Label_mem", "Addr to", str );
+    ui_mem->lineEdit_10->setText(str);
+    int ind = 0;
+    getValueFromIni("Label_mem", "inx from", ind );
+    ui_mem->comboBox_15->setCurrentIndex(ind);
+    getValueFromIni("Label_mem", "inx to", ind );
+    ui_mem->comboBox_12->setCurrentIndex(ind);
+    connect(ui_mem->pushButton_7, &QPushButton::clicked, this, &MainWindow::selectFileMemOp );
+    connect(ui_mem->checkBox_3, &QCheckBox::toggled, this, [&](bool bVal){ui_mem->pushButton_7->setEnabled(bVal); } );
+
+    connect(ui_mem->comboBox_15,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+    connect(ui_mem->comboBox_12,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::slotReWrSettingsInIni);
+ //   connect(ui_mem->lineEdit_5, &QLineEdit::editingFinished, this, [this, str = ui->lineEdit_5->text()]{ qDebug() << "labmda"; setValueToIniFile("Label_mem", "Addr from", str);} );
+//    connect(ui_mem->lineEdit_10, &QLineEdit::editingFinished, this, [this, str = ui->lineEdit_10->text()]{ setValueToIniFile("Label_mem", "Addr to", str);} );
+}
+
+
+void MainWindow::selectFileMemOp() {
+    QString dir, pref;
+    getValueFromIni("WorkingDirectories", "LoadPath", dir );
+    getValueFromIni("WorkingDirectories", "Prefix", pref );
+    QString filename = QFileDialog::getOpenFileName(0, "OpenDialog", dir.isEmpty() ? QDir::currentPath() : dir,
+                           pref.isEmpty() ? "Data files(*.bin);;COM files(*.com);;All files(*.*)" : pref  );
+    if (!filename.isEmpty()) {
+        ui_mem->lineEdit_13->setText(filename);
+        memLoadFile flMem(filename);
+
+        connect(&flMem, &memLoadFile::showMemFileSize, this, []() { qDebug() << "val"/*ui_mem->lineEdit_8->setText(QString::number(val))*/;} );
+    }
+
+
+}
+
+
+
+
+void MainWindow::showPortForm() {
+    ui_port = new Ui_Form_Port;
+    portForm = new QWidget;
+    ui_port->setupUi(portForm);
+    portForm->show();
+
+}
+
+
+void MainWindow::createToolBars() {
   ui->toolBar->addAction(new QAction(tr("Очистить экран"), this));
   QLabel *lbl = new QLabel("aaaaaaaa");
   ui->toolBar->addWidget(lbl);
@@ -172,6 +237,7 @@ void MainWindow::handleErrorFromPort( QSerialPort::SerialPortError error) {
     }
 }
 
+
 void MainWindow::readData() {
     const QByteArray data = m_serial->readAll();
     parseData p(data);
@@ -193,10 +259,15 @@ void MainWindow::manageSerialPort() {
     }
 }
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if (memForm) delete memForm;
+    if (portForm) delete portForm;
+}
+
 
 
 MainWindow::~MainWindow() {
-
+    closeSerialPort();
     saveSettings();
     delete ui;
 }
@@ -274,7 +345,7 @@ void MainWindow::slotWriteComboToIni(const QString &keyName, QComboBox *cmb) {
     }
     lst=lst.toSet().toList();
     int  i = 0;
-    for (auto  str : lst ) {
+    for (const auto  &str : lst ) {
         ini_file.setArrayIndex(i);
         ini_file.setValue("name", lst.at(i));
         i++;
@@ -312,7 +383,6 @@ void MainWindow::saveSettings() {
     setValueToIniFile("Settings", "Height", MainWindow::height());
     setValueToIniFile("Settings", "Width", MainWindow::width());
     setValueToIniFile("WorkingDirectories", "Reports_path", ui->lineEdit->text());
-    setValueToIniFile("WorkingDirectories", "Capture_path", ui->lineEdit_2->text());
     setValueToIniFile("WorkingDirectories", "Capture_path", ui->lineEdit_2->text());
     slotWriteComboToIni(SKRPTNAME_KEY, ui->comboBox_8);
     ini_file.sync();
@@ -443,28 +513,31 @@ void MainWindow::slotSetWrkFilesDir() {
 void MainWindow::slotReWrSettingsInIni( const QString & str ) {
     if (QObject::sender() == ui->comboBox_6) {
          setValueToIniFile("Settings", "COM_parity", str);
-         //emit signalUpdateComParity(getComPortParity());
      }
      else if (QObject::sender() == ui->comboBox_7) {
          setValueToIniFile("Settings", "COM_stopBits", str);
-         //emit signalUpdateComStopBits( getComStopBits());
      }
      else if (QObject::sender() == ui->comboBox_5) {
          setValueToIniFile("Settings", "COM_dataBits", str);
-         //emit signalUpdateComDataBits(getComDataBits());
      }
      else if (QObject::sender() == ui->comboBox_4) {
          setValueToIniFile("Settings", "Com_speed", str);
-        // emit signalUpdateComSpeed(ui->comboBox_4->currentText().toInt());
      }
      else if (QObject::sender() == ui->comboBox_10) {
         setValueToIniFile("Settings", "Module_capacity", str);
         setValidatorsFunc(ui->comboBox_10);
     }
-    else if (QObject::sender() == ui->comboBox_9) setValueToIniFile("Settings", "Module_arch", str);
+    else if (QObject::sender() == ui->comboBox_9) {
+        setValueToIniFile("Settings", "Module_arch", str);
+    }
     else if (QObject::sender() == ui->comboBox_3) {
         setValueToIniFile("Settings", "Com_index", str);
-       // emit signalUpdateComName(ui->comboBox_3->currentText());
+    }
+    else if (QObject::sender() == ui_mem->comboBox_12) {
+        setValueToIniFile("Label_mem", "Com_index", str);
+    }
+    else if (QObject::sender() == ui_mem->comboBox_15) {
+        setValueToIniFile("Label_mem", "Com_index", str);
     }
 }
 
@@ -485,6 +558,7 @@ void MainWindow::setValidatorsFunc(const QObject *var) {
 //            ui->radioButton_16->setEnabled(true);
             cntResz=16;
         }
+
 
 
         QValidator *numbersOnly = new QRegExpValidator(rx, this);
@@ -555,6 +629,7 @@ void MainWindow::getValueFromIni( const QString & group, const QString &section,
 void MainWindow::getValueFromIni( const QString & group, const QString &section, QString &value ) {
     ini_file.beginGroup(group);
     value = ini_file.value(section, "").toString();
+    qDebug() << group << " " << section << " " << value << endl;
     ini_file.endGroup();
 }
 
@@ -562,6 +637,7 @@ void MainWindow::getValueFromIni( const QString & group, const QString &section,
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const QString &value ) {
     ini_file.beginGroup(group);
     ini_file.setValue(section, value);
+    qDebug() << group << " " << section << " " << value << endl;
     ini_file.endGroup();
     ini_file.sync();
 }
