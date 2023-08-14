@@ -7,7 +7,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), ini_file(QApplication::applicationDirPath() + "/MonServ.ini"),
-      m_serial(new QSerialPort(this)), fl(nullptr) {
+      m_serial(new QSerialPort(this)), fl(nullptr), main_state(State::SimpleOutput) {
 
     ui->setupUi(this);
 
@@ -16,20 +16,11 @@ MainWindow::MainWindow(QWidget *parent)
     restoreSettings();
     createCmdMem();
 
-    lineEdVect.append(ui->lineEdit_4);
-    lineEdVect.append(ui->lineEdit_5);
-    lineEdVect.append(ui->lineEdit_9);
-    lineEdVect.append(ui->lineEdit_10);
-    lineEdVect.append(ui->lineEdit_12);
-    lineEdVect.append(ui->lineEdit_14);
-    lineEdVect.append(ui->lineEdit_15);
-    lineEdVect.append(ui->lineEdit_20);
-
-
 
     connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::manageSerialPort);
     connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleErrorFromPort);
     connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+
 
 
 
@@ -65,6 +56,9 @@ MainWindow::MainWindow(QWidget *parent)
      connect(ui->action_5, &QAction::triggered, this, &MainWindow::openButtonClicked);
      connect(ui->comboBox_8,  static_cast<void(QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this, &MainWindow::showScript);
 
+
+//     connect(ui->action_14, &QAction::triggered, this, )
+
      connect(ui->action_18, &QAction::triggered, this, &MainWindow::showMemForm);
      connect(ui->action_19, &QAction::triggered, this, &MainWindow::showPortForm);
 
@@ -86,6 +80,128 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+void MainWindow::portOpReadData() {
+    bool opRes;
+    quint32 addr = ui_mem->lineEdit_10->text().toUInt(&opRes, 16);
+    int size = 1;
+    switch (ui_mem->comboBox_12->currentIndex()) {
+        case 0:
+            size = 1;
+            break;
+        case 1:
+            size = 2;
+            break;
+        case 2:
+            size = 4;
+            break;
+        case 3:
+            size = 8;
+            break;
+    }
+    operation_size = size;
+    main_state = State::ReadPort;
+//   monOperations *op = new monOperations(this, main_state, addr, size);
+//    connect(op, &monOperations::signalWriteArrayToPort, this, &MainWindow::writeData );
+//    op->begin_operation();
+
+
+}
+
+
+void MainWindow::memOpReadData() {
+    bool opRes;
+    quint32 addr = ui_mem->lineEdit_5->text().toUInt(&opRes, 16);
+    int size = 1;
+    monOperations *op;
+    if (ui_mem->checkBox_3->isChecked()) {
+        opInfo.opState = State::ReadFile;
+        opInfo.opFile = ui_mem->lineEdit_13->text();
+        //open file and clean it, then close again
+        QFile fl(opInfo.opFile);
+        fl.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        fl.close();
+        size = ui_mem->lineEdit_8->text().toInt();
+        op = new monOperations(this, opInfo, addr, size);
+
+    }
+    else {
+        opInfo.opState = State::ReadMem;
+        switch (ui_mem->comboBox_15->currentIndex()) {
+            case 0:
+                size = 1;
+                break;
+            case 1:
+                size = 2;
+                break;
+            case 2:
+                size = 4;
+                break;
+            case 3:
+                size = 8;
+                break;
+        }
+        op = new monOperations(this, opInfo, addr, size);
+    }
+    operation_size = size; //for del
+    opInfo.opSize = size;
+    connect(op, &monOperations::signalWriteArrayToPort, this, &MainWindow::writeData );
+    op->begin_operation();
+}
+
+void MainWindow::memOpWriteData() {
+    if (ui_mem->lineEdit_10->text().isEmpty()) {
+        printRdData("err", tr("Не введен адрес"));
+        return;
+    }
+    if (ui_mem->lineEdit_4->text().isEmpty()) {
+        printRdData("err", tr("Не введены данные для записи"));
+        return;
+    }
+    bool opRes;
+    quint32 addr = ui_mem->lineEdit_10->text().toUInt(&opRes, 16);
+    quint32 data = ui_mem->lineEdit_4->text().toUInt(&opRes, 16);
+    int size = 1;
+    switch (ui_mem->comboBox_12->currentIndex()) {
+        case 0:
+            size = 1;
+            break;
+        case 1:
+            size = 2;
+            break;
+        case 2:
+            size = 4;
+            break;
+        case 3:
+            size = 8;
+            break;
+    }
+    int repTimes = 1;
+    bool needInfo = false;
+    if (ui_mem->checkBox_6->isChecked()) {
+        repTimes = ui_mem->lineEdit_7->text().toInt();
+        needInfo = true;
+    }
+
+    while( repTimes ) {
+        if (needInfo) {
+            printRdData("info", QString::number(repTimes));
+        }
+        ui->textEdit->insertPlainText(QString::number(repTimes));
+        operation_size = size;
+        main_state = State::WriteMem;
+  /*      monOperations *op = new monOperations(this, main_state, addr, size, data);
+        connect(op, &monOperations::signalWriteArrayToPort, this, &MainWindow::writeData );
+        op->begin_operation();*/
+        repTimes--;
+    }
+
+
+
+    if (needInfo) {
+        printRdData("info", tr("Операция завершена"));
+    }
+
+}
 
 void MainWindow::showMemForm() {
     ui_mem = new Ui_Form_Mem;
@@ -94,39 +210,45 @@ void MainWindow::showMemForm() {
     memForm->show();
     ui_mem->pushButton_7->setEnabled(false);
     QString str = nullptr;
-    getValueFromIni( "Label_mem", "Addr from", str );
+    getValueFromIni( PANEL_MEM_OP, WRITE_ADDR, str );
     ui_mem->lineEdit_5->setText(str);
-    getValueFromIni( "Label_mem", "Addr to", str );
+    getValueFromIni( PANEL_MEM_OP, READ_ADDR, str );
     ui_mem->lineEdit_10->setText(str);
-    int ind = 0;
-    getValueFromIni("Label_mem", "inx from", ind );
-    ui_mem->comboBox_15->setCurrentIndex(ind);
-    getValueFromIni("Label_mem", "inx to", ind );
-    ui_mem->comboBox_12->setCurrentIndex(ind);
+    getValueFromIni(PANEL_MEM_OP, WRITE_SIZE, str );
+    ui_mem->comboBox_15->setCurrentText(str);
+    getValueFromIni(PANEL_MEM_OP, READ_SIZE, str );
+    ui_mem->comboBox_12->setCurrentText(str);
+    getValueFromIni(PANEL_MEM_OP, JUMP_ADDR, str );
+    ui_mem->lineEdit_20->setText(str);
     connect(ui_mem->pushButton_7, &QPushButton::clicked, this, &MainWindow::selectFileMemOp );
+    connect(ui_mem->pushButton_18, &QPushButton::clicked, this, &MainWindow::memOpReadData );
+    connect(ui_mem->pushButton_19, &QPushButton::clicked, this, &MainWindow::memOpWriteData );
     connect(ui_mem->checkBox_3, &QCheckBox::toggled, this, [&](bool bVal){ui_mem->pushButton_7->setEnabled(bVal); } );
-
     connect(ui_mem->comboBox_15,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
     connect(ui_mem->comboBox_12,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
- //   connect(ui_mem->lineEdit_5, &QLineEdit::editingFinished, this, [this, str = ui->lineEdit_5->text()]{ qDebug() << "labmda"; setValueToIniFile("Label_mem", "Addr from", str);} );
-//    connect(ui_mem->lineEdit_10, &QLineEdit::editingFinished, this, [this, str = ui->lineEdit_10->text()]{ setValueToIniFile("Label_mem", "Addr to", str);} );
+    connect(ui_mem->lineEdit_5, &QLineEdit::editingFinished, this, [&]{ setValueToIniFile(PANEL_MEM_OP, WRITE_ADDR,  ui_mem->lineEdit_5->text());} );
+    connect(ui_mem->lineEdit_10, &QLineEdit::editingFinished, this, [&]{ setValueToIniFile(PANEL_MEM_OP, READ_ADDR, ui_mem->lineEdit_10->text());} );
+    connect(ui_mem->lineEdit_20, &QLineEdit::editingFinished, this, [&]{ setValueToIniFile(PANEL_MEM_OP, JUMP_ADDR, ui_mem->lineEdit_20->text());} );
+    connect(ui_mem->checkBox_6, &QCheckBox::toggled, this, [&]( bool bV ){ if (bV) ui_mem->lineEdit_7->setFocus(); } );
 }
 
 
 void MainWindow::selectFileMemOp() {
-    QString dir, pref;
-    getValueFromIni("WorkingDirectories", "LoadPath", dir );
+    QString dir = "", pref = "";
+    getValueFromIni( WorkingDirectories, LoadFileToMemory_path, dir );
     getValueFromIni("WorkingDirectories", "Prefix", pref );
     QString filename = QFileDialog::getOpenFileName(0, "OpenDialog", dir.isEmpty() ? QDir::currentPath() : dir,
                            pref.isEmpty() ? "Data files(*.bin);;COM files(*.com);;All files(*.*)" : pref  );
     if (!filename.isEmpty()) {
-        ui_mem->lineEdit_13->setText(filename);
-        memLoadFile flMem(filename);
-
-        connect(&flMem, &memLoadFile::showMemFileSize, this, []() { qDebug() << "val"/*ui_mem->lineEdit_8->setText(QString::number(val))*/;} );
+        setValueToIniFile(WorkingDirectories, LoadFileToMemory_path, QFileInfo(filename).path());
+        ui_mem->lineEdit_13->setText(filename);      
+        ui_mem->lineEdit_8->setText( QString::number(QFileInfo(filename).size()));
+   //     memLoadFile flMem(filename);
+   //     connect(&flMem, &memLoadFile::showMemFileSize, this, []() { qDebug() << "val"/*ui_mem->lineEdit_8->setText(QString::number(val))*/;} );
     }
+
 
 
 }
@@ -238,11 +360,32 @@ void MainWindow::handleErrorFromPort( QSerialPort::SerialPortError error) {
 }
 
 
+void MainWindow::printRdData(const QString &marker, const QString &data) {
+    ui_mem->label_4->clear();
+    if (marker == "mr") {
+        ui_mem->lineEdit_12->clear();
+        ui_mem->lineEdit_12->setText(data);
+    }
+    else if (marker == "err"  || marker == "info") {
+        ui_mem->label_4->setStyleSheet(QString("font-size: %1px").arg(12));
+        ui_mem->label_4->setText(data);
+    }
+    else if (marker == "pr") {
+        ui_mem->lineEdit_4->setText(data);
+    }
+}
+
+
 void MainWindow::readData() {
     const QByteArray data = m_serial->readAll();
-    parseData p(data);
+    parseData p(this, data, &opInfo, operation_size );
     connect(&p, &parseData::showData, this, &MainWindow::showString);
+    connect(&p, &parseData::printDataInField, this, &MainWindow::printRdData);
     p.parser();
+}
+
+void MainWindow::writeData(const QByteArray &data) {
+    m_serial->write(data);
 }
 
 
@@ -251,7 +394,7 @@ void MainWindow::showString( const QString &str ) {
 }
 
 void MainWindow::manageSerialPort() {
-    if ( ui->pushButton->text() == "Подключиться") {
+    if ( ui->pushButton->text() == tr("Подключиться")) {
         openSerialPort();
     }
     else {
@@ -275,8 +418,12 @@ MainWindow::~MainWindow() {
 void MainWindow::openSerialPort() {
    if (!ui->comboBox_3->currentText().isEmpty())
        m_serial->setPortName( ui->comboBox_3->currentText() );
-   else
-       throw std::invalid_argument("Input seral port name");
+   else {
+       QMessageBox::critical(this, tr("Ошибка подключения"),
+            tr("Не указан номер COM-порта"));
+       return;
+   }
+
 
    if (ui->comboBox_4->currentText().isEmpty())
         throw std::invalid_argument("Input seral port baud rate");
@@ -360,8 +507,6 @@ void MainWindow::slotReadFromIniToCombo(QComboBox *cmb) {
     else if (cmb == ui->comboBox_2) keyNm = MODNMBS_KEY;
     else if (cmb == ui->comboBox_11) keyNm = STNDNAME_KEY;
     else if (cmb == ui->comboBox_8) keyNm = SKRPTNAME_KEY;
-    else if (cmb == ui->comboBox_13) keyNm = SKRPTNAME_KEY;
-
     int sz=ini_file.beginReadArray(keyNm);
     for (int i=0; i<sz; ++i) {
         ini_file.setArrayIndex(i);
@@ -511,6 +656,7 @@ void MainWindow::slotSetWrkFilesDir() {
 }
 
 void MainWindow::slotReWrSettingsInIni( const QString & str ) {
+    qDebug() << "rewrite settings" << str.at(0);
     if (QObject::sender() == ui->comboBox_6) {
          setValueToIniFile("Settings", "COM_parity", str);
      }
@@ -534,10 +680,10 @@ void MainWindow::slotReWrSettingsInIni( const QString & str ) {
         setValueToIniFile("Settings", "Com_index", str);
     }
     else if (QObject::sender() == ui_mem->comboBox_12) {
-        setValueToIniFile("Label_mem", "Com_index", str);
+        setValueToIniFile(PANEL_MEM_OP, READ_SIZE, str);
     }
     else if (QObject::sender() == ui_mem->comboBox_15) {
-        setValueToIniFile("Label_mem", "Com_index", str);
+        setValueToIniFile(PANEL_MEM_OP, WRITE_SIZE, str);
     }
 }
 

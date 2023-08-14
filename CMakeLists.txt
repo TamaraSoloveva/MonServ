@@ -18,7 +18,8 @@ find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 
 set(PROJECT_SOURCES
         main.cpp mainwindow.cpp mainwindow.h ui_MonServ.h outTimerClass.cpp outTimerClass.h parseData.cpp parseData.h
-        script.cpp script.h common.h ui_portWrRd.h ui_memWrRd.h memloadfile.cpp memloadfile.h )
+        script.cpp script.h common.h ui_portWrRd.h ui_memWrRd.h memloadfile.cpp memloadfile.h Pack.h monOperations.cpp
+        monOperations.h)
 
 
 qt5_add_resources(RSS_SOURCES resources.qrc)

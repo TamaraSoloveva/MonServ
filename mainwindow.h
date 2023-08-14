@@ -17,6 +17,8 @@
 #include "memloadfile.h"
 
 
+#include "monOperations.h"
+
 
 
 
@@ -56,6 +58,12 @@ private:
     Script *fl;
     useFields info;
     QMap<QString, useFields> mCmd;
+
+
+    operationInfo opInfo;
+    State main_state;
+    int operation_size;
+
 
     void createToolBars();
     QToolBar *scriptToolBar;
@@ -117,11 +125,17 @@ private slots:
     void showMemForm();
     void showPortForm();
 
+    void memOpReadData();
+    void memOpWriteData();
+    void portOpReadData();
+
+
 
 
 public slots:
     void showString( const QString &str);
     void addLineToTable(const QVector<QVector<QString> > &line);
+    void printRdData(const QString &marker, const QString &data);
 
 
 signals:
