@@ -3,8 +3,6 @@
 #include "Pack.h"
 #include "common.h"
 
-
-
 class monOperations  : public QObject {
     Q_OBJECT
 public:
@@ -27,3 +25,6 @@ private:
 signals:
     void signalWriteArrayToPort( QByteArray array );
 };
+
+
+

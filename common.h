@@ -50,7 +50,7 @@ struct operationInfo {
     State opState = State::SimpleOutput;
     quint32 opSize = 0;
     QString opFile = "";
-    quint32 fileChSm = 0;
+    quint16 fileChSm = 0;
     quint32 wrkSz = 0;
 };
 
@@ -92,3 +92,4 @@ const quint8 READ_PORT_DWORD = 0x44;
 const quint8 LOAD_FILE_TO_MEM = 0x33;
 const quint8 READ_FILE_FROM_MEM = 0x35;
 const quint8 JUMP_TO_MEM = 0x38;
+

@@ -18,6 +18,7 @@
 
 
 #include "monOperations.h"
+#include "extLineEdit.h"
 
 
 
@@ -68,7 +69,10 @@ private:
     void createToolBars();
     QToolBar *scriptToolBar;
 
-    void openSerialPort();
+    //for memory operations
+    extLineEdit *lineEdit_7, *lineEdit_8, *lineEdit_5, *lineEdit_12, *lineEdit_10, *lineEdit_4;
+
+    qint8 openSerialPort();
     void closeSerialPort();
     void writeData(const QByteArray &data);
     void readData();
@@ -128,6 +132,8 @@ private slots:
     void memOpReadData();
     void memOpWriteData();
     void portOpReadData();
+
+    void changeEnableMode( bool setTrue );
 
 
 

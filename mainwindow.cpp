@@ -16,14 +16,9 @@ MainWindow::MainWindow(QWidget *parent)
     restoreSettings();
     createCmdMem();
 
-
     connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::manageSerialPort);
     connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleErrorFromPort);
     connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
-
-
-
-
 
     connect(ui->comboBox_3,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
@@ -116,13 +111,14 @@ void MainWindow::memOpReadData() {
     if (ui_mem->checkBox_3->isChecked()) {
         opInfo.opState = State::ReadFile;
         opInfo.opFile = ui_mem->lineEdit_13->text();
+        opInfo.fileChSm = 0;
+        opInfo.wrkSz = 0;
         //open file and clean it, then close again
         QFile fl(opInfo.opFile);
         fl.open(QIODevice::WriteOnly | QIODevice::Truncate);
         fl.close();
-        size = ui_mem->lineEdit_8->text().toInt();
+        size = lineEdit_8->removeSpaces().toInt();
         op = new monOperations(this, opInfo, addr, size);
-
     }
     else {
         opInfo.opState = State::ReadMem;
@@ -178,7 +174,7 @@ void MainWindow::memOpWriteData() {
     int repTimes = 1;
     bool needInfo = false;
     if (ui_mem->checkBox_6->isChecked()) {
-        repTimes = ui_mem->lineEdit_7->text().toInt();
+        repTimes = lineEdit_7->text().toInt();
         needInfo = true;
     }
 
@@ -189,7 +185,7 @@ void MainWindow::memOpWriteData() {
         ui->textEdit->insertPlainText(QString::number(repTimes));
         operation_size = size;
         main_state = State::WriteMem;
-  /*      monOperations *op = new monOperations(this, main_state, addr, size, data);
+  /*    monOperations *op = new monOperations(this, main_state, addr, size, data);
         connect(op, &monOperations::signalWriteArrayToPort, this, &MainWindow::writeData );
         op->begin_operation();*/
         repTimes--;
@@ -209,6 +205,30 @@ void MainWindow::showMemForm() {
     ui_mem->setupUi(memForm);
     memForm->show();
     ui_mem->pushButton_7->setEnabled(false);
+
+    lineEdit_7 = new extLineEdit(1, 22, 132);
+    lineEdit_8 = new extLineEdit(1, 22, 132);
+
+    lineEdit_5 = new extLineEdit(2, 22, 132, ui_mem->frame);
+    lineEdit_5->setGeometry(100, 200, 100, 200);
+    lineEdit_5->setText("aaaaa");
+
+    lineEdit_12 = new extLineEdit(2, 22, 132);
+    lineEdit_10 = new extLineEdit(2, 22, 132);
+    lineEdit_4 = new extLineEdit(2, 22, 132);
+
+
+
+
+
+
+    //ui_mem->horizontalLayout_2->addWidget(lineEdit_7);
+    //ui_mem->horizontalLayout_2->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    ui_mem->horizontalLayout_2->addWidget(lineEdit_8);
+    ui_mem->horizontalLayout_2->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    connect(lineEdit_7, &extLineEdit::editingFinished, lineEdit_7, &extLineEdit::slotTextChanged );
+    connect(lineEdit_8, &extLineEdit::editingFinished, lineEdit_8, &extLineEdit::slotTextChanged );
+
     QString str = nullptr;
     getValueFromIni( PANEL_MEM_OP, WRITE_ADDR, str );
     ui_mem->lineEdit_5->setText(str);
@@ -220,6 +240,7 @@ void MainWindow::showMemForm() {
     ui_mem->comboBox_12->setCurrentText(str);
     getValueFromIni(PANEL_MEM_OP, JUMP_ADDR, str );
     ui_mem->lineEdit_20->setText(str);
+
     connect(ui_mem->pushButton_7, &QPushButton::clicked, this, &MainWindow::selectFileMemOp );
     connect(ui_mem->pushButton_18, &QPushButton::clicked, this, &MainWindow::memOpReadData );
     connect(ui_mem->pushButton_19, &QPushButton::clicked, this, &MainWindow::memOpWriteData );
@@ -231,7 +252,8 @@ void MainWindow::showMemForm() {
     connect(ui_mem->lineEdit_5, &QLineEdit::editingFinished, this, [&]{ setValueToIniFile(PANEL_MEM_OP, WRITE_ADDR,  ui_mem->lineEdit_5->text());} );
     connect(ui_mem->lineEdit_10, &QLineEdit::editingFinished, this, [&]{ setValueToIniFile(PANEL_MEM_OP, READ_ADDR, ui_mem->lineEdit_10->text());} );
     connect(ui_mem->lineEdit_20, &QLineEdit::editingFinished, this, [&]{ setValueToIniFile(PANEL_MEM_OP, JUMP_ADDR, ui_mem->lineEdit_20->text());} );
-    connect(ui_mem->checkBox_6, &QCheckBox::toggled, this, [&]( bool bV ){ if (bV) ui_mem->lineEdit_7->setFocus(); } );
+    connect(ui_mem->checkBox_6, &QCheckBox::toggled, this, [&]( bool bV ){ if (bV) lineEdit_7->setFocus(); } );
+
 }
 
 
@@ -244,7 +266,7 @@ void MainWindow::selectFileMemOp() {
     if (!filename.isEmpty()) {
         setValueToIniFile(WorkingDirectories, LoadFileToMemory_path, QFileInfo(filename).path());
         ui_mem->lineEdit_13->setText(filename);      
-        ui_mem->lineEdit_8->setText( QString::number(QFileInfo(filename).size()));
+        lineEdit_8->setText( QString::number(QFileInfo(filename).size()));
    //     memLoadFile flMem(filename);
    //     connect(&flMem, &memLoadFile::showMemFileSize, this, []() { qDebug() << "val"/*ui_mem->lineEdit_8->setText(QString::number(val))*/;} );
     }
@@ -394,12 +416,16 @@ void MainWindow::showString( const QString &str ) {
 }
 
 void MainWindow::manageSerialPort() {
+    bool bSetTrue = false;
     if ( ui->pushButton->text() == tr("Подключиться")) {
-        openSerialPort();
+        if ( openSerialPort() != -1) {
+            bSetTrue = true;
+        }
     }
     else {
         closeSerialPort();
     }
+    changeEnableMode(bSetTrue);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -415,22 +441,28 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::openSerialPort() {
+qint8 MainWindow::openSerialPort() {
    if (!ui->comboBox_3->currentText().isEmpty())
        m_serial->setPortName( ui->comboBox_3->currentText() );
    else {
        QMessageBox::critical(this, tr("Ошибка подключения"),
             tr("Не указан номер COM-порта"));
-       return;
+       return -1;
    }
 
+   if (!ui->comboBox_4->currentText().isEmpty())
+       m_serial->setBaudRate( ui->comboBox_4->currentText().toInt());
+   else {
+       QMessageBox::critical(this, tr("Ошибка подключения"),
+            tr("Не указано скорость работы COM-порта"));
+       return -1;
+   }
 
-   if (ui->comboBox_4->currentText().isEmpty())
-        throw std::invalid_argument("Input seral port baud rate");
-   m_serial->setBaudRate( ui->comboBox_4->currentText().toInt());
-
-   if ( ui->comboBox_7->currentText().isEmpty() )
-       throw std::invalid_argument("Input seral port stop bits number");
+   if ( ui->comboBox_7->currentText().isEmpty() ) {
+       QMessageBox::critical(this, tr("Ошибка подключения"),
+            tr("Не указано количество стоповых бит COM-порта"));
+       return -1;
+   }
    float stop_v = ui->comboBox_7->currentText().toFloat();
    if  (stop_v == 1)
         m_serial->setStopBits(QSerialPort::OneStop);
@@ -441,8 +473,11 @@ void MainWindow::openSerialPort() {
    else
        m_serial->setStopBits(QSerialPort::OneStop);
 
-   if ( ui->comboBox_6->currentText().isEmpty() )
-       throw std::invalid_argument("Input seral port stop parity");
+   if ( ui->comboBox_6->currentText().isEmpty() ) {
+       QMessageBox::critical(this, tr("Ошибка подключения"),
+            tr("Не указана четность COM-порта"));
+       return -1;
+   }
    QString par_str = ui->comboBox_6->currentText();
    if (par_str == "No")
         m_serial->setParity( QSerialPort::NoParity);
@@ -452,8 +487,12 @@ void MainWindow::openSerialPort() {
        m_serial->setParity ( QSerialPort::OddParity);
    else m_serial->setParity( QSerialPort::NoParity);
 
-   if ( ui->comboBox_5->currentText().isEmpty() )
-       throw std::invalid_argument("Input seral port data_bits");
+   if ( ui->comboBox_5->currentText().isEmpty() ) {
+       QMessageBox::critical(this, tr("Ошибка подключения"),
+            tr("Не указано число битов данных COM-порта"));
+       return -1;
+   }
+
    qint32 data_bits = ui->comboBox_5->currentText().toInt();
    if (data_bits == 5 )
        m_serial->setDataBits(QSerialPort::Data5);
@@ -467,12 +506,18 @@ void MainWindow::openSerialPort() {
         m_serial->setDataBits(QSerialPort::Data8);
 
    m_serial->setFlowControl( QSerialPort::NoFlowControl);
-
    if (m_serial->open(QIODevice::ReadWrite)) {
         connectInterface(true);
    } else {
        QMessageBox::critical(this, tr("Error"), m_serial->errorString());
+       return -1;
    }
+   return 0;
+}
+
+void MainWindow::changeEnableMode( bool setTrue ) {
+    ui->menu_11->setEnabled(setTrue);
+
 }
 
 void MainWindow::closeSerialPort() {

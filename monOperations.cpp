@@ -111,3 +111,6 @@ void monOperations::packData(){
     QByteArray array = QByteArray::fromRawData((const char *)outPack.arr, wrSz);
     emit signalWriteArrayToPort(array);
 }
+
+
+

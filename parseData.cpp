@@ -6,7 +6,7 @@ void parseData::parser() {
     sData = QString(data);
     QString resultStr = nullptr;
     int getVal = 0;
-    quint32 chSm_cnt = 0, chSm_get = 0;
+    quint16 chSm_cnt = 0, chSm_get = 0;
     unsigned char *arr1;
 
 
@@ -76,13 +76,9 @@ void parseData::parser() {
             break;
     case State::ReadFile:
     {
-        emit printDataInField("info", QString("Прочитано %1 байтов").arg(op->wrkSz));
-        if (op->wrkSz == 242048) {
-            int tt = 0;
-        }
         std::unique_ptr<unsigned char[]> arr(new unsigned char[data.size()]);
         std::memcpy(arr.get(), data.constData(), data.size());
-        qDebug() << data.size();
+//        qDebug() << data.size();
         if (arr[0] == 0xb3)
             emit printDataInField("err",  QString(tr("Ошибка контрольной суммы")));
         else {
@@ -91,15 +87,28 @@ void parseData::parser() {
                 emit printDataInField("err",  QString(tr("Ошибка открытия файла")));
                 return;
             }
-            for (int i = 0; i < data.size()-3; ++i) {
+            op->wrkSz += data.size();
+            int max_v = 0;
+            if ( op->wrkSz == op->opSize + 3) {
+                max_v = data.size()-3;
+                emit printDataInField("info", QString("Прочитано %1 байтов").arg(op->wrkSz - 3));
+            }
+            else {
+                max_v = data.size();
+                emit printDataInField("info", QString("Прочитано %1 байтов").arg(op->wrkSz));
+            }
+
+            for (int i = 0; i < max_v; ++i) {
                 op->fileChSm += arr[i];
             }
-            op->wrkSz += data.size();
+
+
             if ( op->wrkSz == op->opSize + 3) {
+                fl.write(data, data.size()-3);
                 chSm_get = arr[data.size()-2];
                 chSm_get <<= 8;
                 chSm_get |= arr[data.size()-3];
-                if(chSm_cnt != chSm_get) {
+                if(chSm_get !=  op->fileChSm) {
                     emit printDataInField("err",  QString(tr("Ошибка приёма данных")));
                     return;
                 }
@@ -107,7 +116,6 @@ void parseData::parser() {
                     emit printDataInField("err",  QString(tr("Ошибка приёма данных(b2)")));
                     return;
                 }
-                fl.write(data, data.size()-3);
                 emit printDataInField("err",  QString(tr("Операция завершена")));
             }
             else

@@ -1,13 +1,13 @@
 /********************************************************************************
-** Form generated from reading UI file 'memWrRdItHkYP.ui'
+** Form generated from reading UI file 'memWrRdvQnrQd.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.15.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef MEMWRRDITHKYP_H
-#define MEMWRRDITHKYP_H
+#ifndef MEMWRRDVQNRQD_H
+#define MEMWRRDVQNRQD_H
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -19,10 +19,8 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
-#include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
-#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -30,17 +28,13 @@ QT_BEGIN_NAMESPACE
 class Ui_Form_Mem
 {
 public:
+    QFormLayout *formLayout_2;
     QGridLayout *gridLayout_3;
-    QHBoxLayout *horizontalLayout;
     QCheckBox *checkBox_6;
-    QLineEdit *lineEdit_7;
-    QSpacerItem *horizontalSpacer;
     QHBoxLayout *horizontalLayout_2;
     QCheckBox *checkBox_3;
     QSpacerItem *horizontalSpacer_2;
     QLabel *label_5;
-    QLineEdit *lineEdit_8;
-    QSpacerItem *horizontalSpacer_8;
     QHBoxLayout *horizontalLayout_3;
     QLineEdit *lineEdit_13;
     QPushButton *pushButton_7;
@@ -61,7 +55,6 @@ public:
     QLineEdit *lineEdit_4;
     QPushButton *pushButton_19;
     QFormLayout *formLayout;
-    QLabel *label_3;
     QLabel *label_38;
     QLineEdit *lineEdit_20;
     QPushButton *pushButton_20;
@@ -69,24 +62,19 @@ public:
     QLabel *label_11;
     QLabel *label_4;
     QSpacerItem *horizontalSpacer_6;
-    QVBoxLayout *verticalLayout;
-    QHBoxLayout *horizontalLayout_8;
-    QProgressBar *progressBar;
-    QSpacerItem *horizontalSpacer_7;
-    QSpacerItem *verticalSpacer;
 
     void setupUi(QWidget *Form)
     {
         if (Form->objectName().isEmpty())
             Form->setObjectName(QString::fromUtf8("Form"));
         Form->setWindowModality(Qt::WindowModal);
-        Form->resize(590, 369);
-        Form->setMinimumSize(QSize(590, 369));
-        Form->setMaximumSize(QSize(590, 432));
-        gridLayout_3 = new QGridLayout(Form);
+        Form->resize(590, 300);
+        Form->setMinimumSize(QSize(590, 300));
+        Form->setMaximumSize(QSize(590, 302));
+        formLayout_2 = new QFormLayout(Form);
+        formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
+        gridLayout_3 = new QGridLayout();
         gridLayout_3->setObjectName(QString::fromUtf8("gridLayout_3"));
-        horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         checkBox_6 = new QCheckBox(Form);
         checkBox_6->setObjectName(QString::fromUtf8("checkBox_6"));
         checkBox_6->setMaximumSize(QSize(60, 17));
@@ -94,27 +82,10 @@ public:
         checkBox_6->setAutoFillBackground(false);
         checkBox_6->setTristate(false);
 
-        horizontalLayout->addWidget(checkBox_6);
-
-        lineEdit_7 = new QLineEdit(Form);
-        lineEdit_7->setObjectName(QString::fromUtf8("lineEdit_7"));
-        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(lineEdit_7->sizePolicy().hasHeightForWidth());
-        lineEdit_7->setSizePolicy(sizePolicy);
-        lineEdit_7->setMinimumSize(QSize(132, 22));
-        lineEdit_7->setMaximumSize(QSize(132, 22));
-        lineEdit_7->setClearButtonEnabled(false);
-
-        horizontalLayout->addWidget(lineEdit_7);
-
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        horizontalLayout->addItem(horizontalSpacer);
+        gridLayout_3->addWidget(checkBox_6, 0, 0, 1, 1);
 
 
-        gridLayout_3->addLayout(horizontalLayout, 0, 0, 1, 1);
+        formLayout_2->setLayout(0, QFormLayout::LabelRole, gridLayout_3);
 
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
@@ -134,22 +105,8 @@ public:
 
         horizontalLayout_2->addWidget(label_5);
 
-        lineEdit_8 = new QLineEdit(Form);
-        lineEdit_8->setObjectName(QString::fromUtf8("lineEdit_8"));
-        sizePolicy.setHeightForWidth(lineEdit_8->sizePolicy().hasHeightForWidth());
-        lineEdit_8->setSizePolicy(sizePolicy);
-        lineEdit_8->setMinimumSize(QSize(132, 22));
-        lineEdit_8->setMaximumSize(QSize(132, 22));
-        lineEdit_8->setClearButtonEnabled(false);
 
-        horizontalLayout_2->addWidget(lineEdit_8);
-
-        horizontalSpacer_8 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        horizontalLayout_2->addItem(horizontalSpacer_8);
-
-
-        gridLayout_3->addLayout(horizontalLayout_2, 1, 0, 1, 2);
+        formLayout_2->setLayout(1, QFormLayout::LabelRole, horizontalLayout_2);
 
         horizontalLayout_3 = new QHBoxLayout();
         horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
@@ -167,10 +124,13 @@ public:
         horizontalLayout_3->addWidget(pushButton_7);
 
 
-        gridLayout_3->addLayout(horizontalLayout_3, 2, 0, 1, 2);
+        formLayout_2->setLayout(2, QFormLayout::SpanningRole, horizontalLayout_3);
 
         frame = new QFrame(Form);
         frame->setObjectName(QString::fromUtf8("frame"));
+        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(frame->sizePolicy().hasHeightForWidth());
         frame->setSizePolicy(sizePolicy);
         frame->setFrameShape(QFrame::Panel);
@@ -231,7 +191,7 @@ public:
         gridLayout->addWidget(pushButton_18, 3, 1, 1, 1);
 
 
-        gridLayout_3->addWidget(frame, 3, 0, 1, 1);
+        formLayout_2->setWidget(3, QFormLayout::LabelRole, frame);
 
         frame_2 = new QFrame(Form);
         frame_2->setObjectName(QString::fromUtf8("frame_2"));
@@ -299,26 +259,18 @@ public:
         gridLayout_2->addWidget(pushButton_19, 3, 1, 1, 1);
 
 
-        gridLayout_3->addWidget(frame_2, 3, 1, 1, 1);
+        formLayout_2->setWidget(3, QFormLayout::FieldRole, frame_2);
 
         formLayout = new QFormLayout();
         formLayout->setObjectName(QString::fromUtf8("formLayout"));
         formLayout->setSizeConstraint(QLayout::SetFixedSize);
         formLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
-        label_3 = new QLabel(Form);
-        label_3->setObjectName(QString::fromUtf8("label_3"));
-        QFont font;
-        font.setPointSize(9);
-        label_3->setFont(font);
-
-        formLayout->setWidget(0, QFormLayout::SpanningRole, label_3);
-
         label_38 = new QLabel(Form);
         label_38->setObjectName(QString::fromUtf8("label_38"));
         sizePolicy.setHeightForWidth(label_38->sizePolicy().hasHeightForWidth());
         label_38->setSizePolicy(sizePolicy);
 
-        formLayout->setWidget(1, QFormLayout::LabelRole, label_38);
+        formLayout->setWidget(0, QFormLayout::LabelRole, label_38);
 
         lineEdit_20 = new QLineEdit(Form);
         lineEdit_20->setObjectName(QString::fromUtf8("lineEdit_20"));
@@ -327,7 +279,7 @@ public:
         lineEdit_20->setMinimumSize(QSize(132, 22));
         lineEdit_20->setMaximumSize(QSize(132, 22));
 
-        formLayout->setWidget(2, QFormLayout::LabelRole, lineEdit_20);
+        formLayout->setWidget(1, QFormLayout::LabelRole, lineEdit_20);
 
         pushButton_20 = new QPushButton(Form);
         pushButton_20->setObjectName(QString::fromUtf8("pushButton_20"));
@@ -335,10 +287,10 @@ public:
         pushButton_20->setMinimumSize(QSize(132, 26));
         pushButton_20->setMaximumSize(QSize(132, 26));
 
-        formLayout->setWidget(2, QFormLayout::FieldRole, pushButton_20);
+        formLayout->setWidget(1, QFormLayout::FieldRole, pushButton_20);
 
 
-        gridLayout_3->addLayout(formLayout, 4, 0, 1, 1);
+        formLayout_2->setLayout(4, QFormLayout::LabelRole, formLayout);
 
         horizontalLayout_7 = new QHBoxLayout();
         horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
@@ -361,32 +313,7 @@ public:
         horizontalLayout_7->addItem(horizontalSpacer_6);
 
 
-        gridLayout_3->addLayout(horizontalLayout_7, 5, 0, 1, 1);
-
-        verticalLayout = new QVBoxLayout();
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        horizontalLayout_8 = new QHBoxLayout();
-        horizontalLayout_8->setObjectName(QString::fromUtf8("horizontalLayout_8"));
-        progressBar = new QProgressBar(Form);
-        progressBar->setObjectName(QString::fromUtf8("progressBar"));
-        progressBar->setMinimumSize(QSize(500, 21));
-        progressBar->setValue(0);
-
-        horizontalLayout_8->addWidget(progressBar);
-
-        horizontalSpacer_7 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        horizontalLayout_8->addItem(horizontalSpacer_7);
-
-
-        verticalLayout->addLayout(horizontalLayout_8);
-
-        verticalSpacer = new QSpacerItem(20, 17, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-        verticalLayout->addItem(verticalSpacer);
-
-
-        gridLayout_3->addLayout(verticalLayout, 6, 0, 1, 2);
+        formLayout_2->setLayout(5, QFormLayout::LabelRole, horizontalLayout_7);
 
 
         retranslateUi(Form);
@@ -417,7 +344,6 @@ public:
 
         label_23->setText(QCoreApplication::translate("Form", "\320\224\320\260\320\275\320\275\321\213\320\265", nullptr));
         pushButton_19->setText(QCoreApplication::translate("Form", "\320\236\321\202\320\277\321\200\320\260\320\262\320\270\321\202\321\214", nullptr));
-        label_3->setText(QCoreApplication::translate("Form", "\320\237\320\265\321\200\320\265\320\264\320\260\321\207\320\260 \321\203\320\277\321\200\320\260\320\262\320\273\320\265\320\275\320\270\321\217 \320\277\320\276 \320\260\320\264\321\200\320\265\321\201\321\203", nullptr));
         label_38->setText(QCoreApplication::translate("Form", "\320\220\320\264\321\200\320\265\321\201", nullptr));
         pushButton_20->setText(QCoreApplication::translate("Form", "\320\237\320\265\321\200\320\265\320\271\321\202\320\270 \320\277\320\276 \320\260\320\264\321\200", nullptr));
         label_11->setText(QCoreApplication::translate("Form", "\320\241\321\202\320\260\321\202\321\203\321\201:", nullptr));
@@ -426,10 +352,10 @@ public:
 
 };
 
-namespace Ui_Mem {
+namespace Ui {
     class Form: public Ui_Form_Mem {};
-} // namespace Ui_Mem
+} // namespace Ui
 
 QT_END_NAMESPACE
 
-#endif // MEMWRRDITHKYP_H
+#endif // MEMWRRDVQNRQD_H
