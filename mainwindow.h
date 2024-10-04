@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QSplitter>
 #include <QToolBar>
+#include <QDateTime>
 #include "ui_MonServ.h"
 #include "ui_memWrRd.h"
 #include "ui_portWrRd.h"
@@ -17,8 +18,28 @@
 #include "memloadfile.h"
 
 
+
 #include "monOperations.h"
 #include "extLineEdit.h"
+#include "report.h"
+#include "hexspinbox.h"
+
+#include "WorkingStrings.h"
+
+#define STATUS_BAR_CONNECTION_INFO      0
+#define STATUS_BAR_CONNECT_TIMER        1
+
+struct MonQModes_t {
+    bool detectMonCode; //режим определения ID-посылки модуля
+    bool isKREDO;       //определён модуль КРЕДО-3VS
+    bool isCodeDet;     //начат набор посылки-идент модуля
+    bool isAckMsg;      //посылка модуль в ожидании команды
+    bool isPSImode;     //выбор режима работы программы
+    bool isUseLog;      //используем или нет log-файл
+    bool isNewBios;     //тип BIOS
+    bool isThreadRun;
+    int modCode;
+};
 
 
 
@@ -32,7 +53,14 @@ class Ui_MainWindow;
 class Script;
 class Ui_Form_Mem;
 class Ui_Form_Port;
+class Report;
 
+class ConTimer;
+
+#define CONNECT_MSG "Подключиться"
+#define DISCONNECT_MSG "Отключиться"
+#define CONNECT_MSG_STATUS_BAR "Подключено"
+#define DISCONNECT_MSG_STATUS_BAR "Отключено"
 
 
 class MainWindow : public QMainWindow, public Ui_MainWindow
@@ -42,8 +70,11 @@ class MainWindow : public QMainWindow, public Ui_MainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+     void print_message( const unsigned int &type, char *fmt, ...);
+     Report *report_file;
 protected:
     void closeEvent(QCloseEvent *event) override;
+    HexSpinBox *spinBox_1, *spinBox_2, *spinBox_3;
 
 private:
     Ui::MainWindow *ui;
@@ -59,6 +90,21 @@ private:
     Script *fl;
     useFields info;
     QMap<QString, useFields> mCmd;
+
+    QString connectMsg;
+
+
+
+    std::string GetReportName();
+
+    MonQModes_t status_struct;
+    //QTimer *timer_connection;
+    // void countConnectionTime();
+    //unsigned int hours, mins, secs;
+    ConTimer *timer_connection;
+
+    void init_statusVariables();
+
 
 
     operationInfo opInfo;
@@ -84,7 +130,7 @@ private:
     void init_statusBar();
     void restoreSettings();
     void saveSettings();
-    void updateComInfo( QComboBox *cb);
+    void updateComInfo(  QComboBox *cb);
     void sortAlphabetically(QComboBox *cB);
     void setValidatorsFunc(const QObject *var);
 
@@ -126,14 +172,16 @@ private slots:
     void openButtonClicked();
     void showScript(const QString &filename);
 
-    void showMemForm();
-    void showPortForm();
 
     void memOpReadData();
     void memOpWriteData();
     void portOpReadData();
 
     void changeEnableMode( bool setTrue );
+
+    void slotShowMessageInfo( const QString &msg );
+    void slotChoosePathRprtCapture();
+
 
 
 
@@ -142,12 +190,22 @@ public slots:
     void showString( const QString &str);
     void addLineToTable(const QVector<QVector<QString> > &line);
     void printRdData(const QString &marker, const QString &data);
+    //out data to StatusBar
+    void slotShowStatusBarInfo(const QString &msg );
+    //switch Modes
+    void slotSwitchMode(bool checked);
+
+
+
 
 
 signals:
+    void signalSendMessageToEdit( const QString &msg );
+    void signalSendMessageToStatusBar( const QString &msg );
 
 
 
 
 };
+
 #endif // MAINWINDOW_H
