@@ -1,9 +1,6 @@
 #ifndef WORKINGSTRINGS_H
 #define WORKINGSTRINGS_H
 
-#ifndef WRK_STRINGS_H
-#define WRK_STRINGS_H
-
 //INI-file fields
 #define STEND_NAMES_LIST 	"Stend Names"
 #define STEND_KEY			"Stend"
@@ -44,6 +41,8 @@
 #define STATUS_MEMO			"Status Memo"
 #define TEXT_VIEW			"Text view"
 #define PAGECONTROL_WIDTH   "Control width"
+#define CODEC_UTF8          "codecUtf8"
+#define CODEC_WIN           "codecWin"
 //-------------------------------------
 #define CON_INFO	"Connection Info"
 //-------------------------------------
@@ -105,61 +104,5 @@
 
 #define RELE_LIST				"Rele Nums"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
 
 #endif // WORKINGSTRINGS_H

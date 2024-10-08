@@ -1,3 +1,9 @@
+#ifdef Q_OS_WIN32
+#include <windows.h>
+#else
+//тут будут каки-то библиотеки для Unix
+#endif
+
 #include "mainwindow.h"
 #include <QAbstractScrollArea>
 
@@ -54,20 +60,60 @@ MainWindow::MainWindow(QWidget *parent)
     ui->action_7->setEnabled(false);
     ui->action_8->setEnabled(false);
     ui->label_46->setVisible(false);
+    ui->textEdit->setVisible(false);
 
     //============================================================================
-   init_statusVariables();
+    init_statusVariables();
 
-   init_comboBoxes();
-   init_statusBar();
-   restoreSettings();
-   createCmdMem();
+    init_comboBoxes();
+    init_statusBar();
+    restoreSettings();
+    createCmdMem();
+
+    bool checked = false;
+    getValueFromIni(APP_INFO, ANSI_OUT, checked);
+    ui->radioButton_4->setChecked(checked);
+    getValueFromIni(APP_INFO, OEM_OUT, checked);
+    ui->radioButton_5->setChecked(checked);
+    getValueFromIni(APP_INFO, HEX_OUT, checked);
+    ui->radioButton_6->setChecked(checked);
+
+    setCodecs();
+
+    thread = new QThread;
+    parser = new Q_PARSER_CLASS(&mutex, &qqq);
+    parser->moveToThread(thread);
+    connect(thread, &QThread::started, parser, &Q_PARSER_CLASS::process);
+    connect(parser, &Q_PARSER_CLASS::finished, thread, &QThread::quit );
+    connect(parser, &Q_PARSER_CLASS::finished, parser,  &Q_PARSER_CLASS::deleteLater );
+    connect(thread, &QThread::finished, thread,  &QThread::deleteLater);
+    thread->start();
+
+
+    //создаём экран для вывода данных
+    m_console = new Console;
+ //  m_console->setFont(font);
+    m_console->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->verticalLayout->insertWidget(1, m_console );
+
+    wrInfoOb = new wrInfoClass("OEM");
+
+    //ЧТЕНИЕ ДАННЫХ ИЗ ПОРТА
+    connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleErrorFromPort);
+    connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+
+   //вывод данных на экран slotAddDataToQueue
+   //connect( comPrt, SIGNAL(dataOutToConsole(QByteArray)), this, SLOT(slotAddDataToQueue(QByteArray)));
+     connect( wrInfoOb, &wrInfoClass::signalInsertInQueue, this, &MainWindow::slotAddDataToQueue );
+   //connect(comPrt, SIGNAL(convDataOutToConsole(QByteArray)), this, SLOT(slotConvDataOutToConsole(QByteArray)));
+    connect (this, SIGNAL(signalSendDataArray(QByteArray)), wrInfoOb, SLOT(slotReceiveArray(QByteArray)));
+    connect( wrInfoOb, SIGNAL(signalReadyToShow(QByteArray)), this, SLOT(slotShowDataToConsole(QByteArray)));
+
+
 
 
     connect(ui->actionConnection, &QAction::triggered, this, &MainWindow::manageSerialPort);
     connect(ui->action_5, &QAction::triggered, this, &MainWindow::openButtonClicked);
-    connect(m_serial, &QSerialPort::errorOccurred, this, &MainWindow::handleErrorFromPort);
-    connect(m_serial, &QSerialPort::readyRead, this, &MainWindow::readData);
 
     connect(ui->comboBox_3,  static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             this, &MainWindow::slotReWrSettingsInIni);
@@ -90,7 +136,10 @@ MainWindow::MainWindow(QWidget *parent)
     //system menu button - "Get default directories"
     connect(ui->action_3, &QAction::triggered, this, [this]() { ui->lineEdit_2->setText( QDir::currentPath());
                   ui->lineEdit->setText( QDir::currentPath()); setValueToIniFile(WORK_DIRS, RPRT_PATH,  QDir::currentPath());
-                  setValueToIniFile(WORK_DIRS, CAPTURE_PATH,  QDir::currentPath());});
+                  setValueToIniFile(WORK_DIRS, CAPTURE_PATH,  QDir::currentPath());
+                  emit signalSendMessageToEdit(QString(tr("Пути к рабочим файлам установлены по умолчанию"))); });
+
+
 
     connect(ui->action_25, &QAction::triggered, this,  &MainWindow::slotSwitchMode);
 //    connect(ui->action_25, &QAction::triggered, this, [=] (bool checked){ui->action_26->setChecked(!checked);} );
@@ -128,8 +177,28 @@ MainWindow::MainWindow(QWidget *parent)
     connect(spinBox_2, &HexSpinBox::textChanged, this, [=]{setValueToIniFile(WORK_PARAMS, MEM_WRITE_ED,QString(spinBox_2->hexValue())); });
     connect(spinBox_3, &HexSpinBox::textChanged, this, [=]{setValueToIniFile(WORK_PARAMS, MEM_JUMP_ED, QString(spinBox_3->hexValue()));  });
 
-    /*connect(ui->radioButton_4, &QRadioButton::setChecked, this, [=](bool checked){ if(checked) {ui->radioButton_5->setChecked(false);
-                                                                                                ui->radioButton_6->setChecked(false);  } });*/
+    ui->radioButton_4->setCheckable(true);
+    connect(ui->radioButton_4, &QRadioButton::clicked, this, &MainWindow::slotChangeOutputCodec);
+    connect(ui->radioButton_5, &QRadioButton::clicked, this, &MainWindow::slotChangeOutputCodec);
+    connect(ui->radioButton_6, &QRadioButton::clicked, this, &MainWindow::slotChangeOutputCodec);
+
+    //ВКЛАДКА "ОТЛАДКА"
+    //нажатие галочки "Использовать файл"
+    connect( ui->checkBox_9, &QCheckBox::clicked, this, &MainWindow::slotMemOpCheckBox );
+    //считать
+    connect (ui->pushButton_10, &QPushButton::clicked, this, &MainWindow::slotReadButtonPushed );
+    //отправить
+    connect (ui->pushButton_11, SIGNAL(clicked()), this, SLOT(slotWriteButtonPushed()));
+    //считать из порта
+    connect (ui->pushButton_4, SIGNAL(clicked()), this, SLOT(slotReadPrtButtonPushed()));
+    //отправить в порт
+    connect (ui->pushButton_9, SIGNAL(clicked()), this, SLOT(slotWritePrtButtonPushed()));
+    //перейти по адресу
+    connect (ui->pushButton_12, SIGNAL(clicked()), this, SLOT(slotJumpButtonPushed()));
+
+
+    connect( &dbg, &Debug_Operations_Class::signalWritePort, this, &MainWindow::writeData);
+
 
 
 
@@ -149,24 +218,133 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
+
+
 //     connect(ui->action_14, &QAction::triggered, this, )
 
-
-
-
-
-
-    //Библиотека USB
- //   int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
-//    if (bLoad == -1) {
-//       QMessageBox::critical(0, "MonServ",
-//              QString(tr("Библиотека MP709.dll не обнаружена в каталоге %1")).arg( QDir::currentPath().toUtf8().data()),
-//              QMessageBox::Ok);
-//    }
-//    else if (bLoad == -2)
-//        QMessageBox::critical(0, "MonServ", tr("Ошибка при подгрузке функций"), QMessageBox::Ok);*/
-
+     //Библиотека USB
+     int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
+     if (bLoad == -1) {
+         emit signalSendMessageToEdit(QString (tr("Библиотека MP709.dll не обнаружена в каталоге %1")).arg( QDir::currentPath().toUtf8().data()));
+     }
+     else if (bLoad == -2)
+         emit signalSendMessageToEdit(QString(tr("Ошибка при подгрузке функций из библиотеки MP709.dll")));
 }
+
+void MainWindow::slotAddDataToQueue (const QByteArray &ba) {
+    qqq.enqueue(ba);
+}
+
+void MainWindow::slotMemOpCheckBox(bool ch) {
+    if (ch) {
+        ui->pushButton_10->setText(tr("Считать в файл"));
+        ui->pushButton_11->setText(tr("Отправить из файла"));
+        ui->lineEdit_10->setEnabled(true);
+        ui->lineEdit_10->setFocus();
+        ui->comboBox_27->setEnabled(true);
+    }
+    else {
+         ui->pushButton_10->setText(tr("Считать"));
+         ui->pushButton_11->setText(tr("Отправить"));
+         ui->lineEdit_10->setEnabled(false);
+         ui->comboBox_27->setEnabled(false);
+    }
+}
+
+void MainWindow::slotShowDataToConsole( QByteArray &ba ) {
+    int pos=0;
+    int sm=0;
+    while((sm = ba.indexOf("\n\r", pos)) != -1 ) {
+        ba = ba.remove(sm, 2);
+        ba = ba.insert(sm, '\n');
+        ++pos;
+    }
+    if (ui->radioButton_4->isChecked()) {
+        m_console->putData( ba );
+
+    } else if (ui->radioButton_5->isChecked()) {
+         m_console->putDataRus(ba);
+
+    } else if (ui->radioButton_6->isChecked()) {
+        ba = ba.toHex();
+        m_console->putData(ba);
+    }
+}
+
+void MainWindow::repaintBorderLines(QLineEdit *lineEd, bool isError) {
+    if (isError)
+        lineEd->setStyleSheet("font-size: 10pt;  border-style: outset; border-width: 2px; border-color: #ff5500");
+    else
+        lineEd->setStyleSheet("font-size: 10pt; border-width: 1px; border-color: #e7e7e7");
+//      lineEd->setStyleSheet("font-size: 12pt;  border-top-color: ##a2a2a2; border-width: 1px; border-color: #e7e7e7");
+}
+
+void MainWindow::paintStartInterface() {
+    for (int i=0; i<lineEdVect.count(); i++)
+        repaintBorderLines(lineEdVect.at(i), false);
+}
+
+quint32 MainWindow::getOperationSize() {
+    quint32 size = 1;
+    if (ui->comboBox_8->currentText().at(0) == '2')  {
+        size = 2;
+    }
+    else  if (ui->comboBox_8->currentText().at(0) == '4')  {
+        size = 4;
+    }
+    return size;
+}
+
+void MainWindow::slotReadButtonPushed() {
+    paintStartInterface();
+    if ( spinBox_1->text().isEmpty() ) {
+        spinBox_1->setFocus();
+        QMessageBox::warning(0, tr("MonQ"), tr("Введите адрес!"), QMessageBox::Ok);
+        return;
+    }
+    bool ok;
+    quint32 addrH = spinBox_1->text().toUInt(&ok, 16);
+    if (ui->checkBox_9->isChecked())  {
+        //читаем из памяти в файл
+        if (ui->lineEdit_10->text().isEmpty()) {
+            repaintBorderLines(ui->lineEdit_10, true);
+            ui->lineEdit_10->setFocus();
+            QMessageBox::critical(this, tr("MonQ"), tr("Введите количество считываемых байт."),
+                                  QMessageBox::Ok);
+        }
+        else {
+            repaintBorderLines(ui->lineEdit_10, false);
+            WriteToLOG("Чтение из памяти 0x"+spinBox_1->text()+" в файл");
+            WriteToStatus(tr("Чтение из памяти в файл..."));
+            int Sz = ui->lineEdit_10->text().toInt(&ok, 10);
+            QString path;
+            getValueFromIni(WORK_DIRS, GET_FROM_MEM_ADDR, path );
+            if (path.isEmpty()) path = QDir::currentPath();
+            QString filename = QFileDialog::getSaveFileName(0, "SaveDialog", path, "*.bin *.BIN;; All Files(*);; *.com *.COM");
+            if (!filename.isEmpty()) {
+                setValueToIniFile(WORK_DIRS, GET_FROM_MEM_ADDR, QDir(filename).absolutePath() );
+                emit signalSendMessageToEdit(tr("Производится запись %1 байтов в файл %2").arg(Sz).arg(filename));
+                dbg.MemReadToFile(addrH, filename, Sz );
+            }
+            else {
+                emit signalSendMessageToEdit(tr("Файл для записи не выбран!"));
+                WriteToStatus(tr(" "));
+            }
+        }
+    }
+    else {
+        //одиночная операция
+        quint32 cmdType = READ_MEM_BYTE;
+        quint32 size = getOperationSize();
+        ( size == 1 ) ? cmdType = READ_MEM_BYTE : ( size == 2 ) ? cmdType = READ_MEM_WORD : cmdType = READ_MEM_DWORD;
+        WriteToLOG("Чтение из памяти 0x"+ spinBox_1->text() );
+        WriteToStatus(tr("Чтение из памяти.."));
+        dbg.MemRead(addrH, cmdType);
+    }
+}
+
+
+
 void MainWindow::slotChoosePathRprtCapture() {
     QString dir = nullptr;
     QString fieldName;
@@ -459,9 +637,6 @@ void MainWindow::selectFileMemOp() {
 //   //     memLoadFile flMem(filename);
 //   //     connect(&flMem, &memLoadFile::showMemFileSize, this, []() { qDebug() << "val"/*ui_mem->lineEdit_8->setText(QString::number(val))*/;} );
 //    }
-
-
-
 }
 
 
@@ -592,10 +767,11 @@ int MainWindow::LoadUSBLib(const QString & libName) {
 }
 
 void MainWindow::handleErrorFromPort( QSerialPort::SerialPortError error) {
-//    if (error == QSerialPort::ResourceError) {
-//        QMessageBox::critical(this, tr("Critical Error"), m_serial->errorString());
-//        closeSerialPort();
-//    }
+    if (error == QSerialPort::ResourceError) {
+        emit signalSendMessageToEdit(m_serial->errorString());
+        QMessageBox::critical(this, tr("Critical Error"), m_serial->errorString());
+        closeSerialPort();
+    }
 }
 
 
@@ -616,15 +792,18 @@ void MainWindow::printRdData(const QString &marker, const QString &data) {
 
 
 void MainWindow::readData() {
+    QMutexLocker locker(&mutex);
     const QByteArray data = m_serial->readAll();
-    parseData p(this, data, &opInfo, operation_size );
+    slotAddDataToQueue(data);
+//    emit signalSendDataArray(data);
+  /*  parseData p(this, data, &opInfo, operation_size );
     connect(&p, &parseData::showData, this, &MainWindow::showString);
     connect(&p, &parseData::printDataInField, this, &MainWindow::printRdData);
-    p.parser();
+    p.parser();*/
 }
 
-void MainWindow::writeData(const QByteArray &data) {
-//    m_serial->write(data);
+void MainWindow::writeData( const QByteArray &data ) {
+    m_serial->write(data);
 }
 
 
@@ -965,13 +1144,7 @@ void MainWindow::init_comboBoxes() {
     getValueFromIni(WORK_PARAMS, READ_WRITE_SIZE, str);
     if (!str.isEmpty()) {
         ui->comboBox_8->setCurrentText(str);
-        int step_val = 1;
-        if (ui->comboBox_8->currentText().at(0) == '2')  {
-            step_val = 2;
-        }
-        else  if (ui->comboBox_8->currentText().at(0) == '4')  {
-            step_val = 4;
-        }
+        int step_val = getOperationSize();
         spinBox_1->setSingleStep( step_val );
         spinBox_2->setSingleStep( step_val );
         spinBox_3->setSingleStep( step_val );
@@ -1015,13 +1188,7 @@ void MainWindow::slotReWrSettingsInIni( const QString & str ) {
     }
     else if (QObject::sender() == ui->comboBox_8 ) {
         setValueToIniFile(WORK_PARAMS, READ_WRITE_SIZE, str);
-        int step_val = 1;
-        if (ui->comboBox_8->currentText().at(0) == '2')  {
-            step_val = 2;
-        }
-        else  if (ui->comboBox_8->currentText().at(0) == '4')  {
-            step_val = 4;
-        }
+        int step_val = getOperationSize();
         spinBox_1->setSingleStep( step_val );
         spinBox_2->setSingleStep( step_val );
         spinBox_3->setSingleStep( step_val );
@@ -1137,4 +1304,49 @@ void MainWindow::setValueToIniFile( const QString &group, const QString &section
 }
 
 
+void MainWindow::slotChangeOutputCodec() {
 
+    if ( QObject::sender() == ui->radioButton_4 ) {
+        //ANSI
+       setValueToIniFile(APP_INFO, ANSI_OUT, true);
+       setValueToIniFile(APP_INFO, OEM_OUT, false);
+       setValueToIniFile(APP_INFO, HEX_OUT, false);
+
+    }
+    else if ( QObject::sender() == ui->radioButton_5 ) {
+        //OEM
+        setValueToIniFile(APP_INFO, ANSI_OUT, false);
+        setValueToIniFile(APP_INFO, OEM_OUT, true);
+        setValueToIniFile(APP_INFO, HEX_OUT, false);
+    }
+    else if ( QObject::sender() == ui->radioButton_6 ) {
+        //HEX
+        setValueToIniFile(APP_INFO, ANSI_OUT, false);
+        setValueToIniFile(APP_INFO, OEM_OUT, false);
+        setValueToIniFile(APP_INFO, HEX_OUT, true);
+    }
+
+}
+void MainWindow::setCodecs() {
+    //Кодеки
+//     QMenu *menu_codec = new QMenu;
+//     menu_codec->setTitle(tr("Кодировка текста сценария"));
+//     ui->menu_2->addMenu(menu_codec);
+//     actUtf8CodecSet = new QAction(tr("UTF-8"), this);
+//     actWinCodecSet = new QAction( tr("Windows-1251"), this);
+//     menu_codec->addAction(actUtf8CodecSet);
+//     menu_codec->addAction(actWinCodecSet );
+//     actUtf8CodecSet->setCheckable(true);
+//     actWinCodecSet->setCheckable(true);
+//     //если обе кодировки не установлены, по умолчанию виндовая
+//     bool isUtf8 = false;
+//     getValueFromIni(APP_INFO, CODEC_UTF8, isUtf8) ;
+//     actUtf8CodecSet->setChecked(isUtf8);
+//     getValueFromIni(APP_INFO, CODEC_WIN, isUtf8) ;
+//     actWinCodecSet->setChecked(isUtf8);
+//     connect(actUtf8CodecSet, &QAction::toggled, this, SLOT(slotChangeCodecUtf8(bool)));
+//     connect(actWinCodecSet, SIGNAL(toggled(bool)), SLOT(slotChangeCodecWin(bool)));
+//     if (( actUtf8CodecSet->isChecked() && actWinCodecSet->isChecked()) || ( !actUtf8CodecSet->isChecked() && !actWinCodecSet->isChecked())) {
+//         actWinCodecSet->setChecked(true);
+//     }
+}

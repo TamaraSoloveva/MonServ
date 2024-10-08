@@ -11,6 +11,12 @@
 #include <QSplitter>
 #include <QToolBar>
 #include <QDateTime>
+#include <QQueue>
+#include <QThread>
+#include <QMutex>
+#include <QMutexLocker>
+
+
 #include "ui_MonServ.h"
 #include "ui_memWrRd.h"
 #include "ui_portWrRd.h"
@@ -24,7 +30,14 @@
 #include "report.h"
 #include "hexspinbox.h"
 
+#include "baseCommandClass.h"
+#include "outThread.h"
+
 #include "WorkingStrings.h"
+#include "common.h"
+#include "Work_variables.h"
+#include "wrInfoClass.h"
+#include "outputConsole.h"
 
 #define STATUS_BAR_CONNECTION_INFO      0
 #define STATUS_BAR_CONNECT_TIMER        1
@@ -56,6 +69,10 @@ class Ui_Form_Port;
 class Report;
 
 class ConTimer;
+class Console;
+class Q_PARSER_CLASS;
+
+class Debug_Operations_Class;
 
 #define CONNECT_MSG "Подключиться"
 #define DISCONNECT_MSG "Отключиться"
@@ -75,6 +92,10 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
     HexSpinBox *spinBox_1, *spinBox_2, *spinBox_3;
+    Console *m_console;
+
+    void paintStartInterface();
+    quint32 getOperationSize();
 
 private:
     Ui::MainWindow *ui;
@@ -90,8 +111,20 @@ private:
     Script *fl;
     useFields info;
     QMap<QString, useFields> mCmd;
+    QQueue<QByteArray>qqq;
 
     QString connectMsg;
+
+    wrInfoClass *wrInfoOb;
+
+    QAction *actUtf8CodecSet, *actWinCodecSet;
+
+
+    Debug_Operations_Class dbg;
+
+    QThread* thread;
+    Q_PARSER_CLASS *parser;
+    QMutex mutex;
 
 
 
@@ -104,6 +137,14 @@ private:
     ConTimer *timer_connection;
 
     void init_statusVariables();
+
+    void WriteToLOG( const QString &msg ) {}
+    void WriteToStatus( const QString &msg ) {
+        if (!status_struct.isPSImode) {
+            ui->label_46->setVisible(true);
+            ui->label_46->setText(msg);
+        }
+    }
 
 
 
@@ -120,7 +161,7 @@ private:
 
     qint8 openSerialPort();
     void closeSerialPort();
-    void writeData(const QByteArray &data);
+
     void readData();
     void connectInterface( bool setConnected );
     int LoadUSBLib(const QString & libName);
@@ -137,6 +178,8 @@ private:
     void getValueFromIni(const QString &group, const QString &section, int &value);
     void getValueFromIni(const QString &group, const QString &section, bool &value);
     void getValueFromIni(const QString &group, const QString &section, QString &value);
+
+    void setCodecs();
 
 
     typedef bool (*Toggle_Func_Type)( bool state );
@@ -182,6 +225,16 @@ private slots:
     void slotShowMessageInfo( const QString &msg );
     void slotChoosePathRprtCapture();
 
+    void slotChangeOutputCodec();
+
+    //вкладка "ОТЛАДЧИК"
+    void slotMemOpCheckBox(bool ch);
+    void slotReadButtonPushed();
+
+
+    void repaintBorderLines(QLineEdit *lineEd, bool isError);
+
+
 
 
 
@@ -195,6 +248,11 @@ public slots:
     //switch Modes
     void slotSwitchMode(bool checked);
 
+    void writeData(const QByteArray &data);
+    //!!!!!!!!!!!!!!!!!!!!!!!!
+    void slotAddDataToQueue ( const QByteArray &ba);
+    void slotShowDataToConsole(QByteArray &ba );
+
 
 
 
@@ -202,6 +260,7 @@ public slots:
 signals:
     void signalSendMessageToEdit( const QString &msg );
     void signalSendMessageToStatusBar( const QString &msg );
+    void signalSendDataArray( const QByteArray &arr );
 
 
 

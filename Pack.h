@@ -3,9 +3,11 @@
 
 #define UN unsigned
 
+#include "Work_variables.h"
+
 #pragma pack(1)
 
-
+/*
 typedef union _Dt_t   //received data
 {
    UN int 	dt32;   //double word
@@ -105,7 +107,7 @@ typedef union _rq_GTC_t
 //    UN int OpStat;          //С„РёРЅР°Р»СЊРЅС‹Р№ СЃС‚Р°С‚СѓСЃ С‚РµРєСѓС‰РµР№ РѕРїРµСЂР°С†РёРё
 //    UN int OpCode;          //РєРѕРґ РѕРїРµСЂР°С†РёРё, С‡С‚РѕР±С‹ РїРѕРЅСЏС‚СЊ РІ РїРѕС‚РѕРєРµ, СЂРµР·СѓР»СЊС‚Р°С‚ РЅР° РєР°РєСѓСЋ РєРѕРјР°РЅРґСѓ Р¶РґС‘Рј
 //};
-
+*/
 #pragma pack()
 
 #endif // ARRPROT

@@ -4,7 +4,7 @@
 #include <QByteArray>
 #include <QString>
 #include "common.h"
-#include "Pack.h"
+#include "Work_variables.h"
 
 
 class parseData : public QObject  {

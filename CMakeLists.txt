@@ -20,7 +20,8 @@ set(PROJECT_SOURCES
         main.cpp mainwindow.cpp mainwindow.h ui_MonServ.h outTimerClass.cpp outTimerClass.h parseData.cpp parseData.h
         script.cpp script.h common.h ui_portWrRd.h ui_memWrRd.h memloadfile.cpp memloadfile.h Pack.h monOperations.cpp
         monOperations.h extLineEdit.cpp extLineEdit.h Messages.h Messages.cpp MAIN_INCLUDES.h WorkingStrings.h textDocument.cpp textDocument.h
-        report.cpp report.h hexspinbox.cpp hexspinbox.h outThread.cpp outThread.h)
+        report.cpp report.h hexspinbox.cpp hexspinbox.h outThread.cpp outThread.h Work_variables.h baseCommandClass.cpp baseCommandClass.h wrInfoClass.cpp
+        wrInfoClass.h outputConsole.cpp outputConsole.h )
 
 
 qt5_add_resources(RSS_SOURCES resources.qrc)
