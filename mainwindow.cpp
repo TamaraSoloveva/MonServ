@@ -21,11 +21,6 @@ MainWindow::MainWindow(QWidget *parent)
    ini_file.setPath(QSettings::NativeFormat, QSettings::UserScope, QApplication::applicationDirPath() + "/MonServ.conf" );
 #endif
 
-   //QString aaa = QApplication::applicationDirPath() + "/MonServ.conf";
- //  QString aaa = ini_file.fileName();
-
-
-
     spinBox_1 = new HexSpinBox;
     ui->gridLayout_8->addWidget(spinBox_1, 3, 0);
     spinBox_1->setMinimumWidth(171);
@@ -78,10 +73,13 @@ MainWindow::MainWindow(QWidget *parent)
     getValueFromIni(APP_INFO, HEX_OUT, checked);
     ui->radioButton_6->setChecked(checked);
 
+    codesWriteToIni = new QAction( tr("Записать коды модулей в ini-файл") );
+    ui->menu_2->insertAction(ui->action_3, codesWriteToIni);
+
     setCodecs();
 
     thread = new QThread;
-    parser = new Q_PARSER_CLASS(&mutex, &qqq);
+    parser = new Q_PARSER_CLASS(&mutex, &qqq, &cmdCodes );
     parser->moveToThread(thread);
     connect(thread, &QThread::started, parser, &Q_PARSER_CLASS::process);
     connect(parser, &Q_PARSER_CLASS::finished, thread, &QThread::quit );
@@ -140,7 +138,7 @@ MainWindow::MainWindow(QWidget *parent)
                   emit signalSendMessageToEdit(QString(tr("Пути к рабочим файлам установлены по умолчанию"))); });
 
 
-
+    connect(codesWriteToIni, &QAction::triggered, this, &MainWindow::writeOldCodeNumbersToIni );
     connect(ui->action_25, &QAction::triggered, this,  &MainWindow::slotSwitchMode);
 //    connect(ui->action_25, &QAction::triggered, this, [=] (bool checked){ui->action_26->setChecked(!checked);} );
     connect(ui->action_26, &QAction::triggered, this,  &MainWindow::slotSwitchMode);
@@ -221,6 +219,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 //     connect(ui->action_14, &QAction::triggered, this, )
+     emit signalSendMessageToEdit(tr("Используется конфигурационный файл %1").arg(ini_file.fileName()));
+     if (cmdCodes.isEmpty())
+        emit signalSendMessageToEdit(tr("В конфигурационном файле не обнаружен список кодов модулей!"));
 
      //Библиотека USB
      int bLoad = LoadUSBLib( QDir::currentPath() + "/MP709.dll" );
@@ -229,6 +230,21 @@ MainWindow::MainWindow(QWidget *parent)
      }
      else if (bLoad == -2)
          emit signalSendMessageToEdit(QString(tr("Ошибка при подгрузке функций из библиотеки MP709.dll")));
+}
+
+void MainWindow::writeOldCodeNumbersToIni() {
+    QStringList codes;
+    codes << "0F0E01560F0E0100" << "0F0E01560F0E0145" << "0F0E01560F0E0143" << "0F0E01560F0E0144" <<
+             "0F0E01560F0E0141" << "0F0E01570F0E014C" << "0F0E01560F0E01D0" << "0F0E01560F0E01D1" <<
+             "0F0E01560F0E0101" << "0F0E01560F0E0150" << "0F0E01560F0E0146";
+    int i = 0;
+    ini_file.beginGroup(MODULE_CODES);
+    for ( auto code_str : codes   ) {
+        setValueToIniFile( MODULE_CODES, QString::number(i, 10), code_str );
+        i++;
+    }
+    ini_file.endGroup();
+    emit signalSendMessageToEdit(tr("Коды записаны в конфигурационный файл, перезапустите приложение"));
 }
 
 void MainWindow::slotAddDataToQueue (const QByteArray &ba) {
@@ -1042,7 +1058,19 @@ void MainWindow::restoreSettings() {
     //Jump
     ui->spinBox_3->setVisible(false);
 
-
+    cmdCodes.clear();
+    //Сохраняем коды модулей в память
+    indx=0;
+    str = "";
+    ini_file. beginGroup(MODULE_CODES);
+    QStringList keys = ini_file.allKeys();
+    if ( keys.count() != -1) {
+        for(indx = 0; indx < keys.count(); ++indx ) {
+            getValueFromIni(MODULE_CODES, QString::number(indx, 10), str );
+            cmdCodes.push_back(str);
+        }
+    }
+    ini_file.endGroup();
      //список сценариев
      slotReadFromIniToCombo(ui->comboBox);
 }
@@ -1276,7 +1304,7 @@ void MainWindow::getValueFromIni( const QString & group, const QString &section,
 void MainWindow::getValueFromIni( const QString & group, const QString &section, QString &value ) {
     ini_file.beginGroup(group);
     value = ini_file.value(section, "").toString();
-    qDebug() << group << " " << section << " " << value << endl;
+ //   qDebug() << group << " " << section << " " << value << endl;
     ini_file.endGroup();
 }
 
@@ -1284,7 +1312,6 @@ void MainWindow::getValueFromIni( const QString & group, const QString &section,
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const QString &value ) {
     ini_file.beginGroup(group);
     ini_file.setValue(section, value);
-    qDebug() << group << " " << section << " " << value << endl;
     ini_file.endGroup();
     ini_file.sync();
 }

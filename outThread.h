@@ -12,7 +12,7 @@ class Q_PARSER_CLASS : public QObject {
     Q_OBJECT
 
 public:
-    Q_PARSER_CLASS( QMutex *m, QQueue<QByteArray>* q )  ;
+    Q_PARSER_CLASS( QMutex *m, QQueue<QByteArray>* q, QVector<QString> *cmdVec ) ;
     ~Q_PARSER_CLASS();
 
 public slots:
@@ -20,10 +20,13 @@ public slots:
 
 signals:
     void finished();
-
+    void parseInputArray( const QByteArray &ba);
+private slots:
+    void slotParseInputArray( const QByteArray &ba );
 private:
     QMutex *mutex;
     QQueue<QByteArray>* outputQ;
+    QVector<QString> *cmdCodes;
 
 };
 

@@ -89,6 +89,7 @@ public:
     ~MainWindow();
      void print_message( const unsigned int &type, char *fmt, ...);
      Report *report_file;
+     QVector<QString>cmdCodes;
 protected:
     void closeEvent(QCloseEvent *event) override;
     HexSpinBox *spinBox_1, *spinBox_2, *spinBox_3;
@@ -96,6 +97,8 @@ protected:
 
     void paintStartInterface();
     quint32 getOperationSize();
+
+    QAction *codesWriteToIni;
 
 private:
     Ui::MainWindow *ui;
@@ -211,6 +214,7 @@ private slots:
     void setValueToIniFile( const QString &group, const QString &section, const QString &val );
     void setValueToIniFile( const QString &group, const QString &section, const bool &val );
     void setValueToIniFile( const QString &group, const QString &section, const int &val );
+    void writeOldCodeNumbersToIni();
 
     void openButtonClicked();
     void showScript(const QString &filename);
