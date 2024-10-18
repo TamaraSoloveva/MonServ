@@ -76,7 +76,11 @@ const QString WorkingDirectories = WORK_DIRS;
 const QString LoadFileToMemory_path = "LoadPath";
 
 
-#define READ_MEM_MODE 2
+#define OUT_DATA_MODE   1
+#define READ_MEM_MODE   2
+#define READ_PORT_MODE  3
+#define WRITE_MEM_MODE  4
+
 
 
 const quint8 PACK_START = 0x31;

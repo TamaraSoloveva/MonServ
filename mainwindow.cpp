@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->gridLayout_8->addWidget(spinBox_2, 3, 2);
     spinBox_2->setMinimumWidth(171);
     spinBox_2->setMinimumHeight(27);
-    getValueFromIni(WORK_PARAMS, PORT_WRITE_ED, addrStr);
+    getValueFromIni(WORK_PARAMS, MEM_WRITE_ED, addrStr);
     spinBox_2->setHexValue(addrStr.toUInt( &ok, 16));
 
     spinBox_3 = new HexSpinBox;
@@ -43,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
     spinBox_3->setMinimumHeight(27);
     getValueFromIni(WORK_PARAMS, MEM_JUMP_ED, addrStr);
     spinBox_2->setHexValue(addrStr.toUInt( &ok, 16));
+
+    connect(spinBox_1, &HexSpinBox::textChanged, this, &MainWindow::setReadAddr );
+    connect(spinBox_2, &HexSpinBox::textChanged, this, &MainWindow::setWriteAddr );
+    connect(spinBox_3, &HexSpinBox::textChanged, this, &MainWindow::setJumpAddr );
 
     //Потом убрать в Creator !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ui->textEdit_4->setEnabled(true);
@@ -56,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->action_8->setEnabled(false);
     ui->label_46->setVisible(false);
     ui->textEdit->setVisible(false);
+    ui->pushButton_10->setEnabled(false);
+    ui->pushButton_11->setEnabled(false);
 
     //============================================================================
     init_statusVariables();
@@ -73,13 +79,15 @@ MainWindow::MainWindow(QWidget *parent)
     getValueFromIni(APP_INFO, HEX_OUT, checked);
     ui->radioButton_6->setChecked(checked);
 
-    codesWriteToIni = new QAction( tr("Записать коды модулей в ini-файл") );
+    codesWriteToIni = new QAction( tr("Обновить коды модулей в ini-файле") );
     ui->menu_2->insertAction(ui->action_3, codesWriteToIni);
+    codeAddToIni = new QAction( tr("Добавить код модуля в ini-файл") );
+    ui->menu_2->insertAction(codesWriteToIni, codeAddToIni);
 
     setCodecs();
 
     thread = new QThread;
-    parser = new Q_PARSER_CLASS(&mutex, &qqq, &cmdCodes );
+    parser = new Q_PARSER_CLASS(&mutex, &qqq, &cmdCodes_hex );
     parser->moveToThread(thread);
     connect(thread, &QThread::started, parser, &Q_PARSER_CLASS::process);
     connect(parser, &Q_PARSER_CLASS::finished, thread, &QThread::quit );
@@ -89,8 +97,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     //создаём экран для вывода данных
+    QFont font("Terminal");
     m_console = new Console;
- //  m_console->setFont(font);
+    m_console->setFont(font);
     m_console->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->verticalLayout->insertWidget(1, m_console );
 
@@ -105,7 +114,14 @@ MainWindow::MainWindow(QWidget *parent)
      connect( wrInfoOb, &wrInfoClass::signalInsertInQueue, this, &MainWindow::slotAddDataToQueue );
    //connect(comPrt, SIGNAL(convDataOutToConsole(QByteArray)), this, SLOT(slotConvDataOutToConsole(QByteArray)));
     connect (this, SIGNAL(signalSendDataArray(QByteArray)), wrInfoOb, SLOT(slotReceiveArray(QByteArray)));
-    connect( wrInfoOb, SIGNAL(signalReadyToShow(QByteArray)), this, SLOT(slotShowDataToConsole(QByteArray)));
+
+    connect( parser, &Q_PARSER_CLASS::signalReadyToShow, this, &MainWindow::slotShowDataToConsole, Qt::QueuedConnection );
+    connect( parser, &Q_PARSER_CLASS::writeErrorMsg, this, &MainWindow::showStatusErrMSG, Qt::QueuedConnection );
+    connect( parser, &Q_PARSER_CLASS::writeOKMsg, this, &MainWindow::showStatusOkMSG, Qt::QueuedConnection );
+
+
+    connect( this, &MainWindow::signalSendMessageToOpStatus, this, &MainWindow::showStatusOkMSG );
+    connect( this, &MainWindow::stopCurrentOperation, parser, &Q_PARSER_CLASS::stopOperation );
 
 
 
@@ -139,6 +155,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     connect(codesWriteToIni, &QAction::triggered, this, &MainWindow::writeOldCodeNumbersToIni );
+    connect(codeAddToIni, &QAction::triggered, this, &MainWindow::addNewCodeNumberToIni );
     connect(ui->action_25, &QAction::triggered, this,  &MainWindow::slotSwitchMode);
 //    connect(ui->action_25, &QAction::triggered, this, [=] (bool checked){ui->action_26->setChecked(!checked);} );
     connect(ui->action_26, &QAction::triggered, this,  &MainWindow::slotSwitchMode);
@@ -186,16 +203,25 @@ MainWindow::MainWindow(QWidget *parent)
     //считать
     connect (ui->pushButton_10, &QPushButton::clicked, this, &MainWindow::slotReadButtonPushed );
     //отправить
-    connect (ui->pushButton_11, SIGNAL(clicked()), this, SLOT(slotWriteButtonPushed()));
+    connect (ui->pushButton_11, &QPushButton::clicked, this, &MainWindow::slotWriteButtonPushed);
     //считать из порта
     connect (ui->pushButton_4, SIGNAL(clicked()), this, SLOT(slotReadPrtButtonPushed()));
     //отправить в порт
     connect (ui->pushButton_9, SIGNAL(clicked()), this, SLOT(slotWritePrtButtonPushed()));
     //перейти по адресу
     connect (ui->pushButton_12, SIGNAL(clicked()), this, SLOT(slotJumpButtonPushed()));
+    //отмена
+    connect (ui->pushButton_14, &QPushButton::clicked, this, &MainWindow::slotCancelButtonPushed );
 
 
     connect( &dbg, &Debug_Operations_Class::signalWritePort, this, &MainWindow::writeData);
+
+    connect( &dbg2, &Debug_Operations_Class2::signalWritePort, this, &MainWindow::writeData);
+    connect( &dbg2, &Debug_Operations_Class2::signalSetOutputMode, parser, &Q_PARSER_CLASS::setOutputMode, Qt::DirectConnection);
+
+    connect( parser, &Q_PARSER_CLASS::writeDataToCom, this, &MainWindow::writeData, Qt::QueuedConnection);
+    connect( parser, &Q_PARSER_CLASS::readMemValueShow,  this, &MainWindow::outReadData, Qt::QueuedConnection );
+
 
 
 
@@ -232,12 +258,102 @@ MainWindow::MainWindow(QWidget *parent)
          emit signalSendMessageToEdit(QString(tr("Ошибка при подгрузке функций из библиотеки MP709.dll")));
 }
 
+void MainWindow::slotCancelButtonPushed() {
+    showStatusOkMSG(tr("Операция прервана"));
+    emit stopCurrentOperation();
+}
+
+void MainWindow::outReadData( const QByteArray &ba, bool isMem ) {
+    QByteArray outBa = ba.mid(0, getOperationSize());
+    isMem ? ui->lineEdit_3->setText(outBa.toHex()) : ui->lineEdit_3->setText(outBa.toHex());
+    emit signalSendMessageToOpStatus(tr("Операция завершена"));
+
+
+}
+
+void MainWindow::showStatusErrMSG( const QString &msg ) {
+    ui->label_46->setStyleSheet("color: red");
+    ui->label_46->setText(msg);
+
+}
+
+void MainWindow::showStatusOkMSG( const QString &msg ) {
+    if (!status_struct.isPSImode) {
+        ui->label_46->setVisible(true);
+        ui->label_46->setStyleSheet("color: black");
+        ui->label_46->setText(msg);
+    }
+
+}
+
+QVector<QByteArray> MainWindow::convertCode(const QVector<QByteArray> &cmdCodes ) {
+    QVector<QByteArray> resCodes;
+    QByteArray bArray;
+     uchar aa = 0, res=0;
+     int cnt = 0;
+     for (auto strCode : cmdCodes) {
+         for (auto ch : strCode ) {
+              if ( ch >= 0x30 && ch <= 0x39)
+                  aa = ch - 0x30;
+              else
+                  aa = ch - 0x37;
+
+              if (cnt == 0) {
+                  res = aa;
+                  res <<= 4;
+                  cnt++;
+              }
+              else {
+                  res |= aa;
+                  bArray.push_back(res);
+                  cnt = 0;
+                  res = 0;
+              }
+        }
+        resCodes.push_back(bArray);
+        bArray.clear();
+
+    }
+    return resCodes;
+}
+
+void MainWindow::addNewCodeNumberToIni() {
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Добавление кода.."),
+                                          tr("Введите код-идентификатор модуля"), QLineEdit::Normal, "", &ok);
+    if (ok && !text.isEmpty()) {
+        if (text.size() != 16) {
+            emit signalSendMessageToEdit(tr("Неверный формат кода-идентификатора! Код не добавлен!"));
+            return;
+        }
+        QByteArray aaa = text.toUpper().toLocal8Bit();
+        int fndInd = cmdCodes.indexOf(aaa);
+        if ( fndInd != -1) {
+            emit signalSendMessageToEdit(tr("Код %1 уже существует в ini-файле").arg(text.toUpper()));
+            return;
+        }
+        cmdCodes.push_back(aaa);
+        cmdCodes_hex.clear();
+        cmdCodes_hex = convertCode(cmdCodes);
+        ini_file.remove(MODULE_CODES);
+        ini_file.beginGroup(MODULE_CODES);
+        int i = 0;
+        for ( auto code_str : cmdCodes   ) {
+            setValueToIniFile( MODULE_CODES, QString::number(i, 10), code_str );
+            i++;
+        }
+        ini_file.endGroup();
+        emit signalSendMessageToEdit(tr("Модуль с кодом %1 добавлен в ini-файл").arg(text.toUpper()));
+    }
+}
+
 void MainWindow::writeOldCodeNumbersToIni() {
-    QStringList codes;
+    QVector<QByteArray>codes;
     codes << "0F0E01560F0E0100" << "0F0E01560F0E0145" << "0F0E01560F0E0143" << "0F0E01560F0E0144" <<
              "0F0E01560F0E0141" << "0F0E01570F0E014C" << "0F0E01560F0E01D0" << "0F0E01560F0E01D1" <<
              "0F0E01560F0E0101" << "0F0E01560F0E0150" << "0F0E01560F0E0146";
     int i = 0;
+    ini_file.remove(MODULE_CODES);
     ini_file.beginGroup(MODULE_CODES);
     for ( auto code_str : codes   ) {
         setValueToIniFile( MODULE_CODES, QString::number(i, 10), code_str );
@@ -267,9 +383,10 @@ void MainWindow::slotMemOpCheckBox(bool ch) {
     }
 }
 
-void MainWindow::slotShowDataToConsole( QByteArray &ba ) {
+void MainWindow::slotShowDataToConsole( const QByteArray &inBa ) {
     int pos=0;
     int sm=0;
+    QByteArray ba = inBa;
     while((sm = ba.indexOf("\n\r", pos)) != -1 ) {
         ba = ba.remove(sm, 2);
         ba = ba.insert(sm, '\n');
@@ -311,13 +428,45 @@ quint32 MainWindow::getOperationSize() {
     return size;
 }
 
+
+void MainWindow::noDataInAddressField( HexSpinBox *hb ) {
+    hb->setFocus();
+    QMessageBox::warning(0, tr("MonQ"), tr("Введите адрес!"), QMessageBox::Ok);
+}
+
+void MainWindow::slotWriteButtonPushed() {
+    op = new WriteOPMem(getOperationSize(), spinBox_2, ui->lineEdit_4->text(), dbg2 );
+
+    connect(op, &MemotyOperationsTab::setAllEditsReady, this, &MainWindow::paintStartInterface );
+    connect( op, &MemotyOperationsTab::errorNoData, this, &MainWindow::noDataInAddressField);
+    connect( op, &MemotyOperationsTab::sendMessage_log, this, &MainWindow::WriteToLOG);
+    connect( op, &MemotyOperationsTab::sendMessage_status, this, &MainWindow::showStatusOkMSG);
+    connect( op, &MemotyOperationsTab::sendMessage_report, this, &MainWindow::WriteToReport);
+
+    op->runOperation();
+
+}
+
+
 void MainWindow::slotReadButtonPushed() {
-    paintStartInterface();
-    if ( spinBox_1->text().isEmpty() ) {
+
+    //op2 = std::make_unique<MemoryOP>(getOperationSize(), spinBox_1, dbg2 );
+    op = new MemoryOP(getOperationSize(), spinBox_1, dbg2 );
+
+    connect(op, &MemotyOperationsTab::setAllEditsReady, this, &MainWindow::paintStartInterface );
+    connect( op, &MemotyOperationsTab::errorNoData, this, &MainWindow::noDataInAddressField);
+    connect( op, &MemotyOperationsTab::sendMessage_log, this, &MainWindow::WriteToLOG);
+    connect( op, &MemotyOperationsTab::sendMessage_status, this, &MainWindow::showStatusOkMSG);
+    connect( op, &MemotyOperationsTab::sendMessage_report, this, &MainWindow::WriteToReport);
+
+    op->runOperation();
+
+   // paintStartInterface();
+  /*  if ( spinBox_1->text().isEmpty() ) {
         spinBox_1->setFocus();
         QMessageBox::warning(0, tr("MonQ"), tr("Введите адрес!"), QMessageBox::Ok);
         return;
-    }
+    }*/
     bool ok;
     quint32 addrH = spinBox_1->text().toUInt(&ok, 16);
     if (ui->checkBox_9->isChecked())  {
@@ -331,7 +480,7 @@ void MainWindow::slotReadButtonPushed() {
         else {
             repaintBorderLines(ui->lineEdit_10, false);
             WriteToLOG("Чтение из памяти 0x"+spinBox_1->text()+" в файл");
-            WriteToStatus(tr("Чтение из памяти в файл..."));
+            showStatusOkMSG(tr("Чтение из памяти в файл..."));
             int Sz = ui->lineEdit_10->text().toInt(&ok, 10);
             QString path;
             getValueFromIni(WORK_DIRS, GET_FROM_MEM_ADDR, path );
@@ -354,9 +503,10 @@ void MainWindow::slotReadButtonPushed() {
         quint32 size = getOperationSize();
         ( size == 1 ) ? cmdType = READ_MEM_BYTE : ( size == 2 ) ? cmdType = READ_MEM_WORD : cmdType = READ_MEM_DWORD;
         WriteToLOG("Чтение из памяти 0x"+ spinBox_1->text() );
-        WriteToStatus(tr("Чтение из памяти.."));
+        showStatusOkMSG(tr("Чтение из памяти.."));
         dbg.MemRead(addrH, cmdType);
     }
+    delete op;
 }
 
 
@@ -810,12 +960,7 @@ void MainWindow::printRdData(const QString &marker, const QString &data) {
 void MainWindow::readData() {
     QMutexLocker locker(&mutex);
     const QByteArray data = m_serial->readAll();
-    slotAddDataToQueue(data);
-//    emit signalSendDataArray(data);
-  /*  parseData p(this, data, &opInfo, operation_size );
-    connect(&p, &parseData::showData, this, &MainWindow::showString);
-    connect(&p, &parseData::printDataInField, this, &MainWindow::printRdData);
-    p.parser();*/
+    qqq.enqueue(data);
 }
 
 void MainWindow::writeData( const QByteArray &data ) {
@@ -1061,16 +1206,18 @@ void MainWindow::restoreSettings() {
     cmdCodes.clear();
     //Сохраняем коды модулей в память
     indx=0;
-    str = "";
+    QByteArray bArr = "";
     ini_file. beginGroup(MODULE_CODES);
     QStringList keys = ini_file.allKeys();
-    if ( keys.count() != -1) {
+    if ( keys.count() != -1) {        
         for(indx = 0; indx < keys.count(); ++indx ) {
-            getValueFromIni(MODULE_CODES, QString::number(indx, 10), str );
-            cmdCodes.push_back(str);
+            getValueFromIni(MODULE_CODES, QString::number(indx, 10), bArr );
+            cmdCodes.push_back(bArr);
         }
     }
     ini_file.endGroup();
+    cmdCodes_hex.clear();
+    cmdCodes_hex = convertCode(cmdCodes);
      //список сценариев
      slotReadFromIniToCombo(ui->comboBox);
 }
@@ -1096,6 +1243,8 @@ void MainWindow::connectInterface( bool setConnected ) {
     ui->action_8->setEnabled(setConnected);
 
 //    ui->pushButton_2->setEnabled(setConnected);
+    ui->pushButton_10->setEnabled(setConnected);
+    ui->pushButton_11->setEnabled(setConnected);
 }
 
 void MainWindow::init_statusBar() {
@@ -1289,7 +1438,7 @@ void MainWindow::sortAlphabetically(QComboBox *cB) {
     }
 }
 
-void MainWindow::getValueFromIni( const QString &group, const QString &section, int &value )  {
+void MainWindow::getValueFromIni( const QString &group, const QString &section, int &value  )  {
     ini_file.beginGroup(group);
     value = ini_file.value(section, -1).toInt();
     ini_file.endGroup();
@@ -1308,12 +1457,10 @@ void MainWindow::getValueFromIni( const QString & group, const QString &section,
     ini_file.endGroup();
 }
 
-
-void MainWindow::setValueToIniFile( const QString &group, const QString &section, const QString &value ) {
+void MainWindow::getValueFromIni(const QString &group, const QString &section, QByteArray &value) {
     ini_file.beginGroup(group);
-    ini_file.setValue(section, value);
+    value = ini_file.value(section, "").toByteArray();
     ini_file.endGroup();
-    ini_file.sync();
 }
 
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const int &value ) {
@@ -1322,6 +1469,22 @@ void MainWindow::setValueToIniFile( const QString &group, const QString &section
     ini_file.endGroup();
     ini_file.sync();
 }
+
+void MainWindow::setValueToIniFile( const QString &group, const QString &section, const QByteArray &value ) {
+    ini_file.beginGroup(group);
+    ini_file.setValue(section, value);
+    ini_file.endGroup();
+    ini_file.sync();
+}
+
+
+void MainWindow::setValueToIniFile( const QString &group, const QString &section, const QString &value ) {
+    ini_file.beginGroup(group);
+    ini_file.setValue(section, value);
+    ini_file.endGroup();
+    ini_file.sync();
+}
+
 
 void MainWindow::setValueToIniFile( const QString &group, const QString &section, const bool &value ) {
     ini_file.beginGroup(group);

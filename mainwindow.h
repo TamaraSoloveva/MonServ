@@ -15,6 +15,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QInputDialog>
 
 
 #include "ui_MonServ.h"
@@ -73,11 +74,12 @@ class Console;
 class Q_PARSER_CLASS;
 
 class Debug_Operations_Class;
+class MemotyOperationsTab;
 
-#define CONNECT_MSG "Подключиться"
-#define DISCONNECT_MSG "Отключиться"
-#define CONNECT_MSG_STATUS_BAR "Подключено"
-#define DISCONNECT_MSG_STATUS_BAR "Отключено"
+#define CONNECT_MSG                 "Подключиться"
+#define DISCONNECT_MSG              "Отключиться"
+#define CONNECT_MSG_STATUS_BAR      "Подключено"
+#define DISCONNECT_MSG_STATUS_BAR   "Отключено"
 
 
 class MainWindow : public QMainWindow, public Ui_MainWindow
@@ -89,16 +91,21 @@ public:
     ~MainWindow();
      void print_message( const unsigned int &type, char *fmt, ...);
      Report *report_file;
-     QVector<QString>cmdCodes;
+     QVector<QByteArray>cmdCodes;
+     QVector<QByteArray>cmdCodes_hex;
 protected:
     void closeEvent(QCloseEvent *event) override;
     HexSpinBox *spinBox_1, *spinBox_2, *spinBox_3;
     Console *m_console;
 
-    void paintStartInterface();
+    MemotyOperationsTab *op;
+
+    std::unique_ptr<MemotyOperationsTab>op2;
+
+
     quint32 getOperationSize();
 
-    QAction *codesWriteToIni;
+    QAction *codesWriteToIni, *codeAddToIni;
 
 private:
     Ui::MainWindow *ui;
@@ -125,6 +132,8 @@ private:
 
     Debug_Operations_Class dbg;
 
+    Debug_Operations_Class2 dbg2;
+
     QThread* thread;
     Q_PARSER_CLASS *parser;
     QMutex mutex;
@@ -141,13 +150,14 @@ private:
 
     void init_statusVariables();
 
-    void WriteToLOG( const QString &msg ) {}
-    void WriteToStatus( const QString &msg ) {
-        if (!status_struct.isPSImode) {
-            ui->label_46->setVisible(true);
-            ui->label_46->setText(msg);
-        }
-    }
+//    void WriteToStatus( const QString &msg ) {
+//        if (!status_struct.isPSImode) {
+//            ui->label_46->setVisible(true);
+//            ui->label_46->setText(msg);
+//        }
+//    }
+
+    QVector<QByteArray> convertCode( const QVector<QByteArray> &codes );
 
 
 
@@ -178,9 +188,10 @@ private:
     void sortAlphabetically(QComboBox *cB);
     void setValidatorsFunc(const QObject *var);
 
-    void getValueFromIni(const QString &group, const QString &section, int &value);
+    void getValueFromIni(const QString &group, const QString &section, int &value );
     void getValueFromIni(const QString &group, const QString &section, bool &value);
     void getValueFromIni(const QString &group, const QString &section, QString &value);
+    void getValueFromIni(const QString &group, const QString &section, QByteArray &value);
 
     void setCodecs();
 
@@ -214,26 +225,36 @@ private slots:
     void setValueToIniFile( const QString &group, const QString &section, const QString &val );
     void setValueToIniFile( const QString &group, const QString &section, const bool &val );
     void setValueToIniFile( const QString &group, const QString &section, const int &val );
+    void setValueToIniFile( const QString &group, const QString &section, const QByteArray &val );
     void writeOldCodeNumbersToIni();
+    void addNewCodeNumberToIni();
 
     void openButtonClicked();
     void showScript(const QString &filename);
+    void slotCancelButtonPushed();
 
 
     void memOpReadData();
     void memOpWriteData();
     void portOpReadData();
 
+    void setReadAddr(const QString &str) { setValueToIniFile(WORK_PARAMS, MEM_READ_ED, str); }
+    void setWriteAddr(const QString &str) { setValueToIniFile(WORK_PARAMS,MEM_WRITE_ED, str); }
+    void setJumpAddr(const QString &str) { setValueToIniFile(WORK_PARAMS, MEM_JUMP_ED, str); }
+
     void changeEnableMode( bool setTrue );
 
-    void slotShowMessageInfo( const QString &msg );
     void slotChoosePathRprtCapture();
 
     void slotChangeOutputCodec();
 
+    void noDataInAddressField( HexSpinBox *hb );
+    void outReadData( const QByteArray &rdData, bool isMem );
+
     //вкладка "ОТЛАДЧИК"
     void slotMemOpCheckBox(bool ch);
     void slotReadButtonPushed();
+    void slotWriteButtonPushed();
 
 
     void repaintBorderLines(QLineEdit *lineEd, bool isError);
@@ -255,20 +276,40 @@ public slots:
     void writeData(const QByteArray &data);
     //!!!!!!!!!!!!!!!!!!!!!!!!
     void slotAddDataToQueue ( const QByteArray &ba);
-    void slotShowDataToConsole(QByteArray &ba );
+    void slotShowDataToConsole( const QByteArray &ba );
+
+     void paintStartInterface();
+
+     //функцуии выводаотладочной информации
+     void slotShowMessageInfo( const QString &msg );
+     void WriteToLOG( const QString &msg ) {}
+     void WriteToStatus( const QString &msg ) {
+         if (!status_struct.isPSImode) {
+             ui->label_46->setVisible(true);
+             ui->label_46->setText(msg);
+         }
+     }
+
+     void WriteToReport(const QString &msg ) {}
 
 
-
-
-
+     void showStatusOkMSG(const QString &msg);
+     void showStatusErrMSG(const QString &msg);
 signals:
     void signalSendMessageToEdit( const QString &msg );
     void signalSendMessageToStatusBar( const QString &msg );
     void signalSendDataArray( const QByteArray &arr );
+    void signalSendMessageToOpStatus( const QString &msg  );
+    void stopCurrentOperation();
+
 
 
 
 
 };
+
+
+
+
 
 #endif // MAINWINDOW_H

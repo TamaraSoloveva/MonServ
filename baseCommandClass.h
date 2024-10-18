@@ -13,11 +13,11 @@ protected:
 public:
 //    explicit BaseCommandClass( Monitor_Page_Class  * WrkFuncs );
 //    virtual ~BaseCommandClass();
-//   virtual void MemWrite( const quint32 &Adr, const quint32 &Dt, const int &Sz ) = 0;
+
 //    virtual void IOWrite( const quint32 &Adr, const quint32 &Dt, const int &Sz ) = 0;
     virtual void MemRead( const quint32 &Adr,  const int &Sz ) = 0;
     virtual void MemReadToFile( const quint32 &Adr, const QString &filename, const int &Sz ) = 0;
-//    virtual quint32 IORead( const quint32 &Adr,  const int &Sz ) = 0;
+    virtual void IORead( const quint32 &Adr,  const int &Sz ) = 0;
 //    virtual void AddData( const quint32 &Adr, const quint32 &Dt, const int &Sz ) = 0;
 //    virtual bool CmpData( const quint32 &Dt1, const quint32 &Dt2, const int &Sz ) = 0;
 //    virtual int Jmp( const QString &Lbl ) = 0;
@@ -52,6 +52,20 @@ public:
 
 };
 
+class Debug_Operations_Class2 : public QObject {
+    Q_OBJECT
+
+public:
+     void MemRead(const int &OP_TYPE, const quint32 &Adr,  const int &type );
+     void MemWrite ( const int &OP_TYPE, const quint32 &Adr, const quint32 &Dt, const int &Sz, const int &type );
+     Debug_Operations_Class2();
+signals:
+    void signalWriteCapture( const QString & msg);
+    void signalWritePort( const QByteArray &arr );
+    void signalSetOutputMode( const int &new_mode );
+
+};
+
 
 
 class Debug_Operations_Class : public BaseCommandClass  {
@@ -62,6 +76,7 @@ private:
 
 public:
     void MemRead(const quint32 &Adr,  const int &type ) override;
+    void IORead( const quint32 &Adr,  const int &Sz ) override;
     void MemReadToFile( const quint32 &Adr, const QString &filename, const int &Sz ) override;
 signals:
     void signalWriteCapture( const QString & msg);
